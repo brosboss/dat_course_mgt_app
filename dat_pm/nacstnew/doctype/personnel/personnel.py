@@ -272,7 +272,9 @@ def get_courses_attended_html(service_number):
 			"course_end_date",
 			"grade",
 			"course_report",
-			"specialty"
+			"specialty",
+			"course_status",
+			"feedback_collected",
 		],
 		order_by="course_start_date desc, creation desc"
 	)
@@ -302,6 +304,14 @@ def get_courses_attended_html(service_number):
 		.courses-attended-table tr:nth-child(even) {
 			background-color: var(--fg-color);
 		}
+		.courses-attended-ok {
+			color: var(--green-600, #2e7d32);
+			font-weight: 500;
+		}
+		.courses-attended-missing {
+			color: var(--red-600, #c62828);
+			font-weight: 500;
+		}
 	</style>
 	<table class="courses-attended-table">
 		<thead>
@@ -310,7 +320,9 @@ def get_courses_attended_html(service_number):
 				<th>Start Date</th>
 				<th>End Date</th>
 				<th>Grade</th>
+				<th>Course Status</th>
 				<th>Course Report</th>
+				<th>Feedback</th>
 				<th>Specialty</th>
 			</tr>
 		</thead>
@@ -321,21 +333,34 @@ def get_courses_attended_html(service_number):
 		# Format dates
 		start_date = frappe.format_value(record.course_start_date, {"fieldtype": "Date"}) if record.course_start_date else ""
 		end_date = frappe.format_value(record.course_end_date, {"fieldtype": "Date"}) if record.course_end_date else ""
-		
-		# Format course report link if available
-		course_report = ""
+
+		course_status = frappe.utils.escape_html(record.course_status or "—")
+
+		# Course report: link when present; label whether it is filed (treated)
 		if record.course_report:
-			course_report = f'<a href="{record.course_report}" target="_blank">View Report</a>'
+			report_url = frappe.utils.escape_html(record.course_report)
+			course_report = (
+				f'<span class="courses-attended-ok">Provided</span> · '
+				f'<a href="{report_url}" target="_blank" rel="noopener noreferrer">View</a>'
+			)
 		else:
-			course_report = "N/A"
-		
+			course_report = '<span class="courses-attended-missing">Not provided</span>'
+
+		# Feedback collected mirrors submitted feedback on Course Attended
+		if record.feedback_collected:
+			feedback_cell = '<span class="courses-attended-ok">Collected</span>'
+		else:
+			feedback_cell = '<span class="courses-attended-missing">Not collected</span>'
+
 		html += f"""
 			<tr>
 				<td>{frappe.utils.escape_html(record.course_name or "")}</td>
 				<td>{start_date}</td>
 				<td>{end_date}</td>
 				<td>{frappe.utils.escape_html(record.grade or "")}</td>
+				<td>{course_status}</td>
 				<td>{course_report}</td>
+				<td>{feedback_cell}</td>
 				<td>{frappe.utils.escape_html(record.specialty or "")}</td>
 			</tr>
 		"""

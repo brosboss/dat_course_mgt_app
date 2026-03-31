@@ -103,34 +103,25 @@ app_include_js = "/assets/dat_pm/js/navigation_sidebar.js"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-#	"*": {
-#		"on_update": "method",
-#		"on_cancel": "method",
-#		"on_trash": "method"
-#	}
-# }
+doc_events = {
+	"Course Nomination": {
+		"on_submit": "dat_pm.nacstnew.doctype.course_nomination.course_nomination.ensure_course_attended_records_for_nomination",
+		"on_cancel": "dat_pm.nacstnew.doctype.course_nomination.course_nomination.cancel_linked_course_attended_for_nomination",
+		"on_trash": "dat_pm.nacstnew.doctype.course_nomination.course_nomination.delete_linked_course_attended_for_nomination",
+	},
+}
 
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-#	"all": [
-#		"dat_pm.tasks.all"
-#	],
-#	"daily": [
-#		"dat_pm.tasks.daily"
-#	],
-#	"hourly": [
-#		"dat_pm.tasks.hourly"
-#	],
-#	"weekly": [
-#		"dat_pm.tasks.weekly"
-#	],
-#	"monthly": [
-#		"dat_pm.tasks.monthly"
-#	],
-# }
+scheduler_events = {
+	# Daily at 00:00 — refresh Course Attended.course_status from dates + Feedback
+	"cron": {
+		"0 0 * * *": [
+			"dat_pm.nacstnew.doctype.course_nomination.course_nomination.update_course_attended_status_from_cron",
+		]
+	},
+}
 
 # Testing
 # -------

@@ -6,9 +6,27 @@
  "engine": "InnoDB",
  "field_order": [
   "course_name",
+  "organising_body",
+  "column_break_g5erd",
+  "course_category",
+  "location",
+  "column_break_jhppk",
+  "duration",
+  "status",
+  "column_break_pq3fc",
+  "start_date",
+  "end_date",
   "section_break_qmme",
-  "personnel_due_for_course",
+  "course_fee",
+  "course_allowances",
+  "column_break_e29do",
+  "currency",
+  "funding_source",
   "section_break_pmhb",
+  "personnel_due_for_course",
+  "section_break_zpzr1",
+  "course_materials",
+  "section_break_tcky6",
   "nominated_personnel",
   "amended_from"
  ],
@@ -16,8 +34,10 @@
   {
    "fieldname": "course_name",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Course Name",
-   "options": "Course Name"
+   "options": "Course Name",
+   "reqd": 1
   },
   {
    "fieldname": "personnel_due_for_course",
@@ -36,7 +56,101 @@
    "fieldname": "nominated_personnel",
    "fieldtype": "Table",
    "label": "Nominated Personnel",
-   "options": "Nominated Personnel"
+   "options": "Nominated Personnel",
+   "reqd": 1
+  },
+  {
+   "fieldname": "organising_body",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Organising Body",
+   "reqd": 1
+  },
+  {
+   "fieldname": "course_category",
+   "fieldtype": "Select",
+   "label": "Course Category",
+   "options": "Local\nInternational"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Data",
+   "label": "Location"
+  },
+  {
+   "fieldname": "duration",
+   "fieldtype": "Data",
+   "label": "Duration"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "End Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_g5erd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_jhppk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Active\nInactive"
+  },
+  {
+   "fieldname": "column_break_pq3fc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "course_fee",
+   "fieldtype": "Data",
+   "label": "Course Fee"
+  },
+  {
+   "fieldname": "course_allowances",
+   "fieldtype": "Data",
+   "label": "Course Allowances"
+  },
+  {
+   "fieldname": "column_break_e29do",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Data",
+   "label": "Currency"
+  },
+  {
+   "fieldname": "funding_source",
+   "fieldtype": "Data",
+   "label": "Funding Source"
+  },
+  {
+   "fieldname": "section_break_zpzr1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_tcky6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "course_materials",
+   "fieldtype": "Table",
+   "label": "Course Materials",
+   "options": "Course Materials"
   },
   {
    "fieldname": "amended_from",
@@ -52,7 +166,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-31 19:20:53.784641",
+ "modified": "2026-03-31 20:10:41.646916",
  "modified_by": "Administrator",
  "module": "nacstnew",
  "name": "Course Nomination",

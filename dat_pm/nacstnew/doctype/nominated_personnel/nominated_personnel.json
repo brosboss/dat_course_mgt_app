@@ -9,7 +9,8 @@
   "service_number",
   "personnel_name",
   "unit",
-  "rank"
+  "rank",
+  "remarks"
  ],
  "fields": [
   {
@@ -45,20 +46,23 @@
    "label": "Rank",
    "options": "Rank",
    "read_only": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Remarks"
   }
  ],
- "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-10 22:12:55.478493",
+ "modified": "2026-03-31 20:14:29.801831",
  "modified_by": "Administrator",
- "module": "Nacstnew",
+ "module": "nacstnew",
  "name": "Nominated Personnel",
  "owner": "Administrator",
  "permissions": [],
- "row_format": "Dynamic",
- "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

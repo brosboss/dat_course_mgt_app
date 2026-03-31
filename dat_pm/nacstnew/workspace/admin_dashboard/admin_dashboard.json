@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"mm2RxS1l98\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">ADMIN Dashboard</span>\",\"col\":12}},{\"id\":\"IUZJcePjKs\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"State\",\"col\":3}},{\"id\":\"Wxa7dPTkgB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Unit\",\"col\":3}},{\"id\":\"wxRLvsrvbJ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Rank\",\"col\":3}},{\"id\":\"eVD1JXRCFE\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Commander Appointment\",\"col\":3}},{\"id\":\"WqlyR-WKSn\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Type of Commission\",\"col\":3}},{\"id\":\"yb6MYVR8Vn\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Grade\",\"col\":3}},{\"id\":\"UvB0BMka3i\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Course\",\"col\":3}},{\"id\":\"u2nZIFmKlr\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Appointment\",\"col\":3}},{\"id\":\"MVvqj-TbAY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Course Name\",\"col\":3}},{\"id\":\"q5lSsUXwfx\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mission Name\",\"col\":3}},{\"id\":\"k42309NxAn\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Personnel Category\",\"col\":3}},{\"id\":\"sGY7SWNCtQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Reference Data Manager\",\"col\":3}},{\"id\":\"S0jZNVXn61\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"4c1tvJ4MCO\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Personnel\",\"col\":3}},{\"id\":\"0_Cj2JBFJy\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Course Attended\",\"col\":3}},{\"id\":\"jzMZFRusy2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Posting Authority\",\"col\":3}},{\"id\":\"3tM6MAyUxQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Part 2 Order\",\"col\":3}},{\"id\":\"uQ9liWa4OB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Promotion\",\"col\":3}},{\"id\":\"R2olJKOiOm\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mission\",\"col\":3}},{\"id\":\"VDvnI725FI\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Create Operator\",\"col\":3}},{\"id\":\"f_pfF1hjlx\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"N_A3FnFFlh\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Personnel\",\"col\":3}},{\"id\":\"366X7eKWck\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Course Attended\",\"col\":3}},{\"id\":\"wTRGBMvDqs\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Posting Authority\",\"col\":3}},{\"id\":\"F25JmO07fr\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Part 2 Order\",\"col\":3}},{\"id\":\"dJrTXK2JQp\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Promotion\",\"col\":3}},{\"id\":\"KeSqVRm13F\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"wDHAKcRV2_\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Analysis Page\",\"col\":3}},{\"id\":\"W0bSqMkhVc\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Data Import\",\"col\":3}}]",
+ "content": "[{\"id\":\"mm2RxS1l98\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">ADMIN Dashboard</span>\",\"col\":12}},{\"id\":\"IUZJcePjKs\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"State\",\"col\":3}},{\"id\":\"Wxa7dPTkgB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Unit\",\"col\":3}},{\"id\":\"wxRLvsrvbJ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Rank\",\"col\":3}},{\"id\":\"eVD1JXRCFE\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Commander Appointment\",\"col\":3}},{\"id\":\"WqlyR-WKSn\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Type of Commission\",\"col\":3}},{\"id\":\"yb6MYVR8Vn\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Grade\",\"col\":3}},{\"id\":\"UvB0BMka3i\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Course\",\"col\":3}},{\"id\":\"u2nZIFmKlr\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Appointment\",\"col\":3}},{\"id\":\"MVvqj-TbAY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Course Name\",\"col\":3}},{\"id\":\"q5lSsUXwfx\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mission Name\",\"col\":3}},{\"id\":\"k42309NxAn\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Personnel Category\",\"col\":3}},{\"id\":\"sGY7SWNCtQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Reference Data Manager\",\"col\":3}},{\"id\":\"S0jZNVXn61\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"4c1tvJ4MCO\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Personnel\",\"col\":3}},{\"id\":\"0_Cj2JBFJy\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Course Attended\",\"col\":3}},{\"id\":\"jzMZFRusy2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Posting Authority\",\"col\":3}},{\"id\":\"1TPts3z3y2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Feedback not Confirmed\",\"col\":3}},{\"id\":\"3tM6MAyUxQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Part 2 Order\",\"col\":3}},{\"id\":\"uQ9liWa4OB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Promotion\",\"col\":3}},{\"id\":\"R2olJKOiOm\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mission\",\"col\":3}},{\"id\":\"Cj7tk13r10\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Course Feedback Page\",\"col\":3}},{\"id\":\"VDvnI725FI\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Create Operator\",\"col\":3}},{\"id\":\"KeSqVRm13F\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"N_A3FnFFlh\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Personnel\",\"col\":3}},{\"id\":\"366X7eKWck\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Course Attended\",\"col\":3}},{\"id\":\"wTRGBMvDqs\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Posting Authority\",\"col\":3}},{\"id\":\"F25JmO07fr\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Part 2 Order\",\"col\":3}},{\"id\":\"dJrTXK2JQp\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Promotion\",\"col\":3}},{\"id\":\"wDHAKcRV2_\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Analysis Page\",\"col\":3}},{\"id\":\"W0bSqMkhVc\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Data Import\",\"col\":3}}]",
  "creation": "2025-12-26 11:14:00.807941",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -11,7 +11,7 @@
  "is_hidden": 0,
  "label": "ADMIN Dashboard",
  "links": [],
- "modified": "2026-03-31 17:08:00.062678",
+ "modified": "2026-03-31 23:02:53.219728",
  "modified_by": "Administrator",
  "module": "nacstnew",
  "name": "ADMIN Dashboard",
@@ -59,6 +59,21 @@
    "doc_view": "List",
    "label": "Analysis Page",
    "link_to": "personnel-list",
+   "type": "Page"
+  },
+  {
+   "color": "Red",
+   "doc_view": "List",
+   "label": "Feedback not Confirmed",
+   "link_to": "Feedback",
+   "stats_filter": "{\"docstatus\":[\"=\",\"0\"]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Course Feedback Page",
+   "link_to": "course-feedback",
    "type": "Page"
   },
   {

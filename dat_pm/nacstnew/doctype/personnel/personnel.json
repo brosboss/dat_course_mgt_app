@@ -174,6 +174,7 @@
   {
    "fieldname": "posting_history_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "Posting History"
   },
   {
@@ -190,6 +191,7 @@
   {
    "fieldname": "promotion_history_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "Promotion History"
   },
   {
@@ -310,6 +312,7 @@
   {
    "fieldname": "strength_returns_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "Strength Returns "
   },
   {
@@ -392,6 +395,7 @@
   {
    "fieldname": "personnel_attsdets_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "Personnel Atts/Dets"
   },
   {
@@ -416,16 +420,19 @@
   {
    "fieldname": "main_primary_specialty",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Main Primary Specialty"
   },
   {
    "fieldname": "main_secondary_specialty",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Main Secondary Specialty"
   },
   {
    "fieldname": "main_auxiliary_specialty",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Main Auxiliary Specialty"
   },
   {
@@ -441,14 +448,13 @@
    "fieldtype": "Section Break"
   }
  ],
- "grid_page_length": 50,
  "hide_toolbar": 1,
  "image_field": "personnel_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-10 22:19:11.642149",
+ "modified": "2026-03-31 20:40:16.963271",
  "modified_by": "Administrator",
- "module": "Nacstnew",
+ "module": "nacstnew",
  "name": "Personnel",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
@@ -655,8 +661,6 @@
    "role": "Can Import Data"
   }
  ],
- "row_format": "Dynamic",
- "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

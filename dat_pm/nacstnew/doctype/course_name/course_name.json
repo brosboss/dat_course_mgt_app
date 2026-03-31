@@ -7,10 +7,6 @@
  "engine": "InnoDB",
  "field_order": [
   "course_name",
-  "course_category",
-  "location",
-  "duration",
-  "status",
   "lft",
   "rgt",
   "is_group",
@@ -22,16 +18,10 @@
   "mandatory_prerequisite_course",
   "column_break_peah",
   "qualified_rank",
-  "organising_body",
   "course_frequency",
   "assignment_mode",
   "section_break_6xuqd",
-  "course_materials",
-  "tab_break_tuckl",
-  "course_fee",
-  "course_allowances",
-  "currency",
-  "funding_source"
+  "course_materials"
  ],
  "fields": [
   {
@@ -107,33 +97,6 @@
    "options": "Qualified Rank"
   },
   {
-   "fieldname": "course_category",
-   "fieldtype": "Select",
-   "label": "Course Category",
-   "options": "Local\nInternational"
-  },
-  {
-   "fieldname": "location",
-   "fieldtype": "Data",
-   "label": "Location"
-  },
-  {
-   "fieldname": "duration",
-   "fieldtype": "Data",
-   "label": "Duration"
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status",
-   "options": "Active\nInactive"
-  },
-  {
-   "fieldname": "organising_body",
-   "fieldtype": "Data",
-   "label": "Organising Body"
-  },
-  {
    "fieldname": "course_frequency",
    "fieldtype": "Select",
    "label": "Course Frequency",
@@ -154,37 +117,13 @@
    "fieldtype": "Table",
    "label": "Course Materials",
    "options": "Course Materials"
-  },
-  {
-   "fieldname": "tab_break_tuckl",
-   "fieldtype": "Tab Break"
-  },
-  {
-   "fieldname": "course_fee",
-   "fieldtype": "Data",
-   "label": "Course Fee"
-  },
-  {
-   "fieldname": "course_allowances",
-   "fieldtype": "Data",
-   "label": "Course Allowances"
-  },
-  {
-   "fieldname": "currency",
-   "fieldtype": "Data",
-   "label": "Currency"
-  },
-  {
-   "fieldname": "funding_source",
-   "fieldtype": "Data",
-   "label": "Funding Source"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2026-03-31 19:30:23.779773",
+ "modified": "2026-03-31 20:09:03.245079",
  "modified_by": "Administrator",
  "module": "nacstnew",
  "name": "Course Name",

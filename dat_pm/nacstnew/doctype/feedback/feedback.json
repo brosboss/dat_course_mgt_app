@@ -1,0 +1,137 @@
+{
+ "actions": [],
+ "autoname": "field:course_reference",
+ "creation": "2026-03-31 20:56:48.078044",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "course_reference",
+  "service_number",
+  "personnel_name",
+  "course_name",
+  "column_break_sutyi",
+  "course_start_date",
+  "course_end_date",
+  "course_report",
+  "grade",
+  "section_break_dbszg",
+  "course_feedback",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "course_reference",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Course Reference",
+   "options": "Course Attended",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fetch_from": "course_reference.service_number",
+   "fieldname": "service_number",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Service Number",
+   "options": "Personnel",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "course_reference.course_name",
+   "fieldname": "course_name",
+   "fieldtype": "Link",
+   "label": "Course Name",
+   "options": "Course Name",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "course_reference.course_start_date",
+   "fieldname": "course_start_date",
+   "fieldtype": "Data",
+   "label": "Course Start Date",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "course_reference.course_end_date",
+   "fieldname": "course_end_date",
+   "fieldtype": "Data",
+   "label": "Course End Date",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "course_report",
+   "fieldtype": "Attach",
+   "label": "Course Report"
+  },
+  {
+   "fieldname": "grade",
+   "fieldtype": "Link",
+   "label": "Grade",
+   "options": "Grade"
+  },
+  {
+   "fieldname": "course_feedback",
+   "fieldtype": "Text Editor",
+   "label": "Course Feedback",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "course_reference.personnel_name",
+   "fieldname": "personnel_name",
+   "fieldtype": "Data",
+   "label": "Personnel Name",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Feedback",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_sutyi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_dbszg",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-03-31 22:09:01.985708",
+ "modified_by": "Administrator",
+ "module": "nacstnew",
+ "name": "Feedback",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

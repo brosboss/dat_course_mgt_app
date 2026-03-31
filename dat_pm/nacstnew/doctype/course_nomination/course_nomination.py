@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import getdate, today
 
 def _get_qualified_service_numbers_for_course(course_name):
 	"""Return set of service_numbers that are qualified for the course (rank, not taken, prereqs done)."""
@@ -17,6 +18,84 @@ def is_personnel_qualified_for_course(service_number, course_name):
 		return 0
 	qualified = _get_qualified_service_numbers_for_course(course_name)
 	return 1 if service_number in qualified else 0
+
+
+def _get_personnel_course_qualification_detail(service_number, course_name):
+	"""Return qualification detail for a personnel/course pair."""
+	if not service_number or not course_name:
+		return {
+			"qualified": 0,
+			"remark": frappe._("Course and personnel are required."),
+		}
+
+	if not frappe.db.exists("Course Name", course_name):
+		return {
+			"qualified": 0,
+			"remark": frappe._("Course '{0}' does not exist.").format(course_name),
+		}
+
+	if not frappe.db.exists("Personnel", service_number):
+		return {
+			"qualified": 0,
+			"remark": frappe._("Personnel '{0}' does not exist.").format(service_number),
+		}
+
+	course_doc = frappe.get_doc("Course Name", course_name)
+	qualified_ranks = [row.rank for row in (course_doc.qualified_rank or []) if row.rank]
+	prerequisite_courses = [row.course_name for row in (course_doc.mandatory_prerequisite_course or []) if row.course_name]
+	personnel_rank = frappe.db.get_value("Personnel", service_number, "current_rank")
+
+	if not qualified_ranks:
+		return {
+			"qualified": 0,
+			"remark": frappe._("Not qualified: no qualified rank has been set for this course."),
+		}
+
+	if not personnel_rank or personnel_rank not in qualified_ranks:
+		return {
+			"qualified": 0,
+			"remark": frappe._(
+				"Not qualified: personnel rank '{0}' is not among qualified ranks for this course."
+			).format(personnel_rank or frappe._("Unknown")),
+		}
+
+	has_taken_this = frappe.db.exists(
+		"Course Attended",
+		{"service_number": service_number, "course_name": course_name, "docstatus": 1},
+	)
+	if has_taken_this:
+		return {
+			"qualified": 0,
+			"remark": frappe._("Not qualified: personnel has already attended this course."),
+		}
+
+	missing_prereqs = []
+	for prereq in prerequisite_courses:
+		has_taken_prereq = frappe.db.exists(
+			"Course Attended",
+			{"service_number": service_number, "course_name": prereq, "docstatus": 1},
+		)
+		if not has_taken_prereq:
+			missing_prereqs.append(prereq)
+
+	if missing_prereqs:
+		return {
+			"qualified": 0,
+			"remark": frappe._("Not qualified: missing prerequisite course(s): {0}.").format(", ".join(missing_prereqs)),
+		}
+
+	return {
+		"qualified": 1,
+		"remark": frappe._(
+			"Qualified: rank is eligible, course has not been attended, and all prerequisites are completed."
+		),
+	}
+
+
+@frappe.whitelist()
+def get_personnel_course_qualification_remark(service_number, course_name):
+	"""Return qualification status and human-readable remark."""
+	return _get_personnel_course_qualification_detail(service_number, course_name)
 
 
 @frappe.whitelist()
@@ -298,6 +377,71 @@ def _demo_add_course_attended(service_number, course_name, start_date, end_date,
 	doc.submit()
 
 
+def _get_linked_course_attended_name(nomination_name, service_number):
+	"""Find Course Attended created from this nomination/personnel pair."""
+	if not nomination_name or not service_number:
+		return None
+	return frappe.db.get_value(
+		"Course Attended",
+		{"course_reference": nomination_name, "service_number": service_number},
+		"name",
+	)
+
+
+# Status values driven by dates + feedback; cron will not overwrite other values (e.g. Deferred).
+_AUTO_MANAGED_COURSE_STATUSES = frozenset(
+	{"Upcoming", "On Course", "Completed with no Feedback", "Completed", "", None}
+)
+
+
+def compute_course_attended_status(course_attended_name, course_start_date, course_end_date):
+	"""
+	Set Course Status from dates and Feedback (Feedback.course_reference → Course Attended).
+	- Before start_date: Upcoming
+	- From start_date through end_date (inclusive): On Course
+	- After end_date: Completed if a Feedback exists, else Completed with no Feedback
+	"""
+	if not course_start_date or not course_end_date:
+		return "Upcoming"
+
+	start = getdate(course_start_date)
+	end = getdate(course_end_date)
+	now = getdate(today())
+
+	if now < start:
+		return "Upcoming"
+	if now > end:
+		has_feedback = frappe.db.exists(
+			"Feedback", {"course_reference": course_attended_name, "docstatus": 1}
+		)
+		return "Completed" if has_feedback else "Completed with no Feedback"
+	return "On Course"
+
+
+@frappe.whitelist()
+def update_course_attended_status_from_cron():
+	"""
+	Scheduled job: refresh course_status on Course Attended rows linked to a Course Nomination.
+	"""
+	names = frappe.get_all(
+		"Course Attended",
+		filters={"docstatus": 1, "course_reference": ["!=", ""]},
+		pluck="name",
+	)
+	for name in names:
+		ref = frappe.db.get_value("Course Attended", name, ["course_reference", "course_start_date", "course_end_date"], as_dict=True)
+		if not ref or not ref.course_reference:
+			continue
+		if not frappe.db.exists("Course Nomination", ref.course_reference):
+			continue
+		current = frappe.db.get_value("Course Attended", name, "course_status")
+		if current not in _AUTO_MANAGED_COURSE_STATUSES:
+			continue
+		new_status = compute_course_attended_status(name, ref.course_start_date, ref.course_end_date)
+		if current != new_status:
+			frappe.db.set_value("Course Attended", name, "course_status", new_status, update_modified=False)
+
+
 class CourseNomination(Document):
 	def validate(self):
 		if not self.course_name or not self.nominated_personnel:
@@ -313,3 +457,108 @@ class CourseNomination(Document):
 					self.course_name, ", ".join(not_qualified)
 				)
 			)
+
+	def on_submit(self):
+		"""Create one submitted Course Attended per nominated personnel; course_reference = this nomination."""
+		ensure_course_attended_records_for_nomination(self)
+
+	def on_update_after_submit(self):
+		"""Keep linked Course Attended records in sync after amendments."""
+		ensure_course_attended_records_for_nomination(self)
+
+	def on_cancel(self):
+		"""Cancel Course Attended records created for this nomination."""
+		cancel_linked_course_attended_for_nomination(self)
+
+	def on_trash(self):
+		"""Delete linked Course Attended records when this nomination is deleted."""
+		delete_linked_course_attended_for_nomination(self)
+
+	def _create_or_update_course_attended_for_row(self, row):
+		existing_name = _get_linked_course_attended_name(self.name, row.service_number)
+		if existing_name:
+			existing = frappe.get_doc("Course Attended", existing_name)
+			if existing.docstatus == 1:
+				frappe.db.set_value(
+					"Course Attended",
+					existing_name,
+					{
+						"course_name": self.course_name,
+						"course_start_date": self.start_date,
+						"course_end_date": self.end_date,
+						"course_status": compute_course_attended_status(existing_name, self.start_date, self.end_date),
+					},
+					update_modified=True,
+				)
+				return
+			if existing.docstatus == 2:
+				frappe.delete_doc("Course Attended", existing_name, force=1, ignore_permissions=True)
+
+		personnel_name = frappe.db.get_value("Personnel", row.service_number, "personnel_name") or row.personnel_name or ""
+		doc = frappe.new_doc("Course Attended")
+		doc.service_number = row.service_number
+		doc.personnel_name = personnel_name
+		doc.course_name = self.course_name
+		doc.course_start_date = self.start_date
+		doc.course_end_date = self.end_date
+		doc.course_reference = self.name
+		doc.legacy_record = 1
+		# Set after name is generated (depends on autoname + course_reference)
+		doc.flags.ignore_permissions = True
+		doc.insert()
+		doc.course_status = compute_course_attended_status(doc.name, self.start_date, self.end_date)
+		doc.flags.ignore_permissions = True
+		doc.save()
+		doc.flags.ignore_permissions = True
+		doc.submit()
+
+
+def ensure_course_attended_records_for_nomination(doc, method=None):
+	"""Hook-safe helper: ensure submitted Course Attended rows exist for a submitted Course Nomination."""
+	if isinstance(doc, str):
+		doc = frappe.get_doc("Course Nomination", doc)
+
+	if not doc.course_name or not doc.nominated_personnel:
+		return
+	for row in doc.nominated_personnel:
+		if not row.service_number:
+			continue
+		doc._create_or_update_course_attended_for_row(row)
+
+
+def cancel_linked_course_attended_for_nomination(doc, method=None):
+	"""Hook-safe helper: cancel linked Course Attended on Course Nomination cancel."""
+	if isinstance(doc, str):
+		doc = frappe.get_doc("Course Nomination", doc)
+	for row in doc.nominated_personnel or []:
+		if not row.service_number:
+			continue
+		ca_name = _get_linked_course_attended_name(doc.name, row.service_number)
+		if not ca_name:
+			continue
+		ca = frappe.get_doc("Course Attended", ca_name)
+		if ca.docstatus == 1:
+			ca.flags.ignore_permissions = True
+			ca.cancel()
+
+
+def delete_linked_course_attended_for_nomination(doc, method=None):
+	"""
+	Hook-safe helper:
+	- ensure linked Course Attended rows are cancelled where necessary
+	- then delete them when Course Nomination is deleted
+	"""
+	if isinstance(doc, str):
+		doc = frappe.get_doc("Course Nomination", doc)
+
+	for row in doc.nominated_personnel or []:
+		if not row.service_number:
+			continue
+		ca_name = _get_linked_course_attended_name(doc.name, row.service_number)
+		if not ca_name:
+			continue
+		ca = frappe.get_doc("Course Attended", ca_name)
+		if ca.docstatus == 1:
+			ca.flags.ignore_permissions = True
+			ca.cancel()
+		frappe.delete_doc("Course Attended", ca_name, force=1, ignore_permissions=True)

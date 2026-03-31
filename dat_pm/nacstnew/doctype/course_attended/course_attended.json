@@ -24,7 +24,8 @@
   "section_break_wftm",
   "document_view",
   "amended_from",
-  "officer_course_status"
+  "course_status",
+  "feedback_collected"
  ],
  "fields": [
   {
@@ -44,26 +45,36 @@
    "reqd": 1
   },
   {
+   "fetch_from": "course_reference.course_name",
    "fieldname": "course_name",
    "fieldtype": "Link",
    "label": "Course Name",
-   "options": "Course Name"
+   "options": "Course Name",
+   "read_only": 1,
+   "reqd": 1
   },
   {
+   "fetch_from": "course_reference.start_date",
    "fieldname": "course_start_date",
    "fieldtype": "Date",
-   "label": "Course Start Date"
+   "label": "Course Start Date",
+   "read_only": 1,
+   "reqd": 1
   },
   {
+   "fetch_from": "course_reference.end_date",
    "fieldname": "course_end_date",
    "fieldtype": "Date",
-   "label": "Course End Date"
+   "label": "Course End Date",
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "column_break_ejco",
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "description": "Only PDF documents are allowed",
    "fieldname": "course_report",
    "fieldtype": "Attach",
@@ -80,10 +91,12 @@
    "label": "Document View"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "grade",
    "fieldtype": "Link",
    "label": "Grade",
-   "options": "Grade"
+   "options": "Grade",
+   "read_only": 1
   },
   {
    "fieldname": "operator",
@@ -112,8 +125,9 @@
   },
   {
    "fieldname": "course_reference",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Course Reference",
+   "options": "Course Nomination",
    "set_only_once": 1
   },
   {
@@ -138,22 +152,32 @@
   {
    "fieldname": "specialty",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Specialty",
-   "options": "\nPrimary Specialty\nSecondary Specialty\nAuxiliary Specialty",
-   "reqd": 1
+   "options": "\nPrimary Specialty\nSecondary Specialty\nAuxiliary Specialty"
   },
   {
-   "fieldname": "officer_course_status",
+   "allow_on_submit": 1,
+   "fieldname": "course_status",
    "fieldtype": "Select",
-   "label": "Officer Course Status",
-   "options": "Upcoming\nOn Course\nCompleted\nDeferred\nAbsent\nOverdue"
+   "label": "Course Status",
+   "options": "Upcoming\nOn Course\nCompleted with no Feedback\nCompleted\nDeferred\nAbsent\nOverdue",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "feedback_collected",
+   "fieldtype": "Check",
+   "label": "Feedback Collected",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-28 19:30:51.104305",
+ "modified": "2026-03-31 22:58:25.980297",
  "modified_by": "Administrator",
  "module": "nacstnew",
  "name": "Course Attended",

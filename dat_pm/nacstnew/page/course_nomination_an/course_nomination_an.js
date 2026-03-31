@@ -12,6 +12,7 @@ frappe.pages["course-nomination-an"].on_page_load = function (wrapper) {
 	wrapper.cna_state = {
 		course_name: null,
 		qualified_set: null,
+		qualification_details: {},
 		personnel_due: [],
 		nominated: [],
 	};
@@ -253,6 +254,7 @@ frappe.pages["course-nomination-an"].on_page_load = function (wrapper) {
 		var val = document.getElementById("cna-course-select").value;
 		state.course_name = val || null;
 		state.qualified_set = null;
+		state.qualification_details = {};
 		state.personnel_due = [];
 		state.nominated = [];
 		render_due();
@@ -321,16 +323,24 @@ frappe.pages["course-nomination-an"].on_page_load = function (wrapper) {
 				"<td>" + escaped(p.personnel_name) + "</td>" +
 				"<td>" + escaped(p.current_rank) + "</td>" +
 				"<td>" + escaped(p.current_unit) + "</td>" +
+				"<td style=\"width: 120px;\"><button type=\"button\" class=\"cna-btn cna-btn-outline cna-why\" data-sn=\"" + escaped(p.service_number) + "\"><i class=\"fa fa-question-circle\"></i> Why?</button></td>" +
 				"</tr>"
 			);
 		}).join("");
 
 		wrap.innerHTML = (
 			"<table class=\"cna-table\">" +
-			"<thead><tr><th style=\"width: 36px; text-align: center;\">#</th><th style=\"width: 90px;\">Status</th><th>Service No.</th><th>Name</th><th>Rank</th><th>Unit</th></tr></thead>" +
+			"<thead><tr><th style=\"width: 36px; text-align: center;\">#</th><th style=\"width: 90px;\">Status</th><th>Service No.</th><th>Name</th><th>Rank</th><th>Unit</th><th style=\"width: 120px;\">Qualification</th></tr></thead>" +
 			"<tbody>" + rows + "</tbody>" +
 			"</table>"
 		);
+
+		wrap.querySelectorAll(".cna-why").forEach(function (btn) {
+			btn.addEventListener("click", function () {
+				var sn = btn.getAttribute("data-sn");
+				show_qualification_why(sn);
+			});
+		});
 	}
 
 	function render_nominated() {
@@ -359,6 +369,7 @@ frappe.pages["course-nomination-an"].on_page_load = function (wrapper) {
 		var rows = state.nominated.map(function (p, idx) {
 			var not_qualified = qualified && !qualified.has(p.service_number);
 			var rowClass = not_qualified ? " cna-row-not-qualified" : "";
+			var remark = p.remarks || (not_qualified ? "Not qualified" : "Qualified");
 			return (
 				"<tr class=\"" + rowClass + "\" data-idx=\"" + idx + "\">" +
 				"<td style=\"width: 36px; text-align: center;\">" + (idx + 1) + "</td>" +
@@ -366,6 +377,7 @@ frappe.pages["course-nomination-an"].on_page_load = function (wrapper) {
 				"<td>" + escaped(p.personnel_name) + "</td>" +
 				"<td>" + escaped(p.current_rank) + "</td>" +
 				"<td>" + escaped(p.current_unit) + "</td>" +
+				"<td>" + escaped(remark) + "</td>" +
 				"<td><button type=\"button\" class=\"cna-btn cna-btn-danger cna-remove\" data-idx=\"" + idx + "\"><i class=\"fa fa-times\"></i> Remove</button></td>" +
 				"</tr>"
 			);
@@ -373,7 +385,7 @@ frappe.pages["course-nomination-an"].on_page_load = function (wrapper) {
 
 		wrap.innerHTML = (
 			"<table class=\"cna-table\">" +
-			"<thead><tr><th style=\"width: 36px; text-align: center;\">#</th><th>Service No.</th><th>Name</th><th>Rank</th><th>Unit</th><th style=\"width: 100px;\"></th></tr></thead>" +
+			"<thead><tr><th style=\"width: 36px; text-align: center;\">#</th><th>Service No.</th><th>Name</th><th>Rank</th><th>Unit</th><th>Remarks</th><th style=\"width: 100px;\"></th></tr></thead>" +
 			"<tbody>" + rows + "</tbody>" +
 			"</table>"
 		);
@@ -401,7 +413,9 @@ frappe.pages["course-nomination-an"].on_page_load = function (wrapper) {
 					personnel_name: dueBySn[sn].personnel_name,
 					current_rank: dueBySn[sn].current_rank,
 					current_unit: dueBySn[sn].current_unit,
+					remarks: "",
 				});
+				refresh_nomination_remark(sn);
 				added++;
 			}
 		});
@@ -410,6 +424,52 @@ frappe.pages["course-nomination-an"].on_page_load = function (wrapper) {
 		if (added) {
 			frappe.show_alert({ message: __("Added {0} personnel to nomination.", [added]), indicator: "blue" }, 3);
 		}
+	}
+
+	function fetch_qualification_detail(service_number, callback) {
+		if (!state.course_name || !service_number) {
+			callback({ qualified: 0, remark: __("Course and personnel are required.") });
+			return;
+		}
+		var cacheKey = state.course_name + "::" + service_number;
+		if (state.qualification_details[cacheKey]) {
+			callback(state.qualification_details[cacheKey]);
+			return;
+		}
+		frappe.call({
+			method: "dat_pm.nacstnew.doctype.course_nomination.course_nomination.get_personnel_course_qualification_remark",
+			args: {
+				course_name: state.course_name,
+				service_number: service_number,
+			},
+			callback: function (r) {
+				var detail = r.message || { qualified: 0, remark: __("Not qualified.") };
+				state.qualification_details[cacheKey] = detail;
+				callback(detail);
+			},
+		});
+	}
+
+	function show_qualification_why(service_number) {
+		fetch_qualification_detail(service_number, function (detail) {
+			var title = detail.qualified ? __("Qualified") : __("Not Qualified");
+			frappe.msgprint({
+				title: title,
+				message: __("{0}: {1}", [frappe.utils.escape_html(service_number || ""), frappe.utils.escape_html(detail.remark || "")]),
+				indicator: detail.qualified ? "green" : "red",
+			});
+		});
+	}
+
+	function refresh_nomination_remark(service_number) {
+		fetch_qualification_detail(service_number, function (detail) {
+			state.nominated.forEach(function (n) {
+				if (n.service_number === service_number) {
+					n.remarks = detail.remark || "";
+				}
+			});
+			render_nominated();
+		});
 	}
 
 	function save_nomination() {
