@@ -1,0 +1,23 @@
+{
+ "content": null,
+ "creation": "2026-01-20 11:36:56.204129",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-01-20 11:36:56.204129",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "postings-with-pengin",
+ "owner": "Administrator",
+ "page_name": "postings-with-pengin",
+ "roles": [
+  {
+   "role": "Can View Dashboard"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 1,
+ "title": "Pending Part 2 Order"
+}

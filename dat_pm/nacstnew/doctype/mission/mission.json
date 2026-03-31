@@ -1,0 +1,213 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:mission_authority",
+ "creation": "2025-12-29 19:31:54.033639",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "legacy_record",
+  "section_break_02jn",
+  "mission_authority",
+  "section_break_izdc",
+  "mission",
+  "column_break_vohf",
+  "reference",
+  "column_break_sgdz",
+  "date",
+  "operator",
+  "auditor",
+  "section_break_sbyv",
+  "mission_list",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_02jn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "mission_authority",
+   "fieldtype": "Data",
+   "label": "Mission Authority",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "section_break_izdc",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "reference",
+   "fieldtype": "Data",
+   "label": "Reference",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "column_break_sgdz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "operator",
+   "fieldtype": "Link",
+   "label": "Operator",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "auditor",
+   "fieldtype": "Link",
+   "label": "Auditor",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_sbyv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "mission_list",
+   "fieldtype": "Table",
+   "label": "Mission List",
+   "options": "Mission List"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Mission",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "mission",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Mission Name",
+   "options": "Mission Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_vohf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Records entered retrospectively where original reference documents are unavailable.",
+   "fieldname": "legacy_record",
+   "fieldtype": "Check",
+   "label": "Legacy Record"
+  }
+ ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-31 14:49:16.513776",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Mission",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Mission Creator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Mission Reader"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Mission Editor",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Mission Deleter",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Mission Submitter",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "read": 1,
+   "role": "Mission Canceller",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Mission Amender",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,215 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "field:returns_reference",
+ "creation": "2026-01-19 13:10:12.169253",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "returns_reference",
+  "column_break_mdlp",
+  "attach_returns",
+  "section_break_vtzo",
+  "year",
+  "quarter",
+  "column_break_hsob",
+  "returns_originator_unit",
+  "personnel_category",
+  "section_break_qjoa",
+  "strength_returns_details",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "personnel_category",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Personnel Category",
+   "options": "Personnel Category",
+   "reqd": 1
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Year",
+   "non_negative": 1,
+   "options": "Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "quarter",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Quarter",
+   "options": "FIRST\nSECOND\nTHIRD\nFOURTH",
+   "reqd": 1
+  },
+  {
+   "fieldname": "strength_returns_details",
+   "fieldtype": "Table",
+   "label": "Strength Returns Details",
+   "options": "Strength Returns Details"
+  },
+  {
+   "fieldname": "section_break_vtzo",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_hsob",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_qjoa",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Strength Returns",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_mdlp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attach_returns",
+   "fieldtype": "Attach",
+   "label": "Attach Returns"
+  },
+  {
+   "fieldname": "returns_originator_unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Returns Originator Unit",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "returns_reference",
+   "fieldtype": "Data",
+   "label": "Returns Reference",
+   "reqd": 1,
+   "set_only_once": 1,
+   "unique": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-01-20 17:34:54.335983",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Strength Returns",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Strength Returns Creator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Strength Returns Editor",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Strength Returns Reader",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Strength Returns Submitter",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Strength Returns Deleter",
+   "share": 1
+  },
+  {
+   "amend": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Strength Returns Amender",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Strength Returns Canceller",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "import": 1,
+   "read": 1,
+   "role": "Can Import Data",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

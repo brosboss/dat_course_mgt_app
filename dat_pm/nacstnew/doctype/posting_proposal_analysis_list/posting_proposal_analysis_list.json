@@ -1,0 +1,71 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-02 17:05:38.590694",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "service_number",
+  "current_unit",
+  "to_unit",
+  "years_in_current_unit",
+  "primary_specialty_course"
+ ],
+ "fields": [
+  {
+   "fieldname": "service_number",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Service Number",
+   "options": "Personnel",
+   "reqd": 1
+  },
+  {
+   "fieldname": "current_unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Current Unit",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "To Unit",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "years_in_current_unit",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Years in Current Unit"
+  },
+  {
+   "fetch_from": "service_number.main_primary_specialty",
+   "fieldname": "primary_specialty_course",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Primary Specialty Course",
+   "options": "Unit",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-04 22:16:33.703031",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Posting Proposal Analysis List",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

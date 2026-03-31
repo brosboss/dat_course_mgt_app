@@ -1,0 +1,74 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-20 20:00:08.176663",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "nas_html",
+  "nas_wol_html",
+  "last_backup_at",
+  "backup_reminder_days"
+ ],
+ "fields": [
+  {
+   "fieldname": "nas_html",
+   "fieldtype": "HTML",
+   "label": "Nas Html"
+  },
+  {
+   "fieldname": "nas_wol_html",
+   "fieldtype": "HTML",
+   "ignore_xss_filter": 1,
+   "label": "NAS wol html"
+  },
+  {
+   "fieldname": "last_backup_at",
+   "fieldtype": "Datetime",
+   "label": "Last Backup At",
+   "read_only": 1
+  },
+  {
+   "default": "7",
+   "fieldname": "backup_reminder_days",
+   "fieldtype": "Int",
+   "label": "Remind Every (Days)"
+  }
+ ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-01-21 07:56:36.124294",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Backup to NAS",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Can Backup NAS",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

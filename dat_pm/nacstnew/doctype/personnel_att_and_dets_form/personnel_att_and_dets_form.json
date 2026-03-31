@@ -1,0 +1,221 @@
+{
+ "actions": [],
+ "autoname": "format:PAF-{###}",
+ "creation": "2026-01-19 18:24:23.868502",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "personnel_attachment_reference",
+  "column_break_hdxe",
+  "attsdets_type",
+  "section_break_untd",
+  "from_unit",
+  "column_break_zbdo",
+  "to_unit",
+  "section_break_idzb",
+  "personnel",
+  "personnel_name",
+  "date",
+  "column_break_qvrz",
+  "type",
+  "remarks",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "personnel",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Personnel",
+   "options": "Personnel",
+   "reqd": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Data",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "personnel_attachment_reference",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Personnel Attachment Reference",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "personnel.personnel_name",
+   "fieldname": "personnel_name",
+   "fieldtype": "Data",
+   "label": "Personnel Name"
+  },
+  {
+   "fieldname": "section_break_idzb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_qvrz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_zbdo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_unit",
+   "fieldtype": "Link",
+   "label": "From Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "to_unit",
+   "fieldtype": "Link",
+   "label": "To Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_hdxe",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attsdets_type",
+   "fieldtype": "Select",
+   "label": "Atts/Dets Type",
+   "options": "Attachment\nDetachment\nRTU"
+  },
+  {
+   "fieldname": "section_break_untd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "Attachment Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Personnel Att and Dets Form",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-01-20 08:51:44.633884",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Personnel Att and Dets Form",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Atts and Dets Creator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Atts and Dets  Amender",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Atts and Dets Canceller",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Atts and Dets Editor",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Atts and Dets Reader",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Atts and Dets Submitter",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Atts and Dets Deleter",
+   "share": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

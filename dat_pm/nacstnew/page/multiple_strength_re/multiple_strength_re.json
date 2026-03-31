@@ -1,0 +1,23 @@
+{
+ "content": null,
+ "creation": "2026-01-20 11:17:24.141916",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-01-20 11:17:24.141916",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "multiple-strength-re",
+ "owner": "Administrator",
+ "page_name": "multiple-strength-re",
+ "roles": [
+  {
+   "role": "Can View Dashboard"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 1,
+ "title": "Personnel with Multiple Strength Rerurns"
+}

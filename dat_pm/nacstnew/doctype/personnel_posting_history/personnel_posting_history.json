@@ -1,0 +1,118 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-25 18:34:08.714239",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_zcpz",
+  "posting_authority",
+  "from_unit",
+  "to_unit",
+  "posting_status",
+  "appointment",
+  "column_break_kwps",
+  "part_2_order",
+  "gaining_unit_date_tos",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_zcpz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "from_unit",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "From Unit",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "to_unit",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "To Unit",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "appointment",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Appointment",
+   "options": "Appointment"
+  },
+  {
+   "fieldname": "posting_authority",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Posting Authority",
+   "options": "Posting Authority",
+   "reqd": 1
+  },
+  {
+   "fieldname": "posting_status",
+   "fieldtype": "Select",
+   "label": "Posting Status",
+   "options": "Effected\nCancelled"
+  },
+  {
+   "fieldname": "column_break_kwps",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "part_2_order",
+   "fieldtype": "Link",
+   "label": "Part 2 Order",
+   "options": "Part 2 Order"
+  },
+  {
+   "fieldname": "gaining_unit_date_tos",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Gaining Unit Date TOS"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Personnel Posting History",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-26 00:22:51.920683",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Personnel Posting History",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

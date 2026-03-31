@@ -1,0 +1,48 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:artillery_gun",
+ "creation": "2026-03-01 09:44:40.792471",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "artillery_gun"
+ ],
+ "fields": [
+  {
+   "fieldname": "artillery_gun",
+   "fieldtype": "Data",
+   "label": "Artillery Gun",
+   "unique": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-01 09:45:13.439284",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Artillery Gun",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,664 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "field:service_number",
+ "creation": "2025-12-25 17:12:12.851712",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "personal_information_tab",
+  "operator",
+  "data_import_reference",
+  "section_break_kxlt",
+  "image",
+  "personnel_image",
+  "personnel_full_picture",
+  "column_break_tvrr",
+  "category",
+  "type_of_commission",
+  "course",
+  "date_of_enlistment",
+  "date_of__commission",
+  "column_break_ayhz",
+  "service_number",
+  "first_name",
+  "middle_name",
+  "other_names",
+  "surname",
+  "personnel_name",
+  "column_break_wwsz",
+  "current_rank",
+  "date_of_last_promotion",
+  "current_unit",
+  "current_unit_location",
+  "current_unit_geopolitical_zone",
+  "current_deployment",
+  "column_break_aubc",
+  "phone_number",
+  "phone_number_2",
+  "remarks",
+  "personnel_unit_reference_section",
+  "personnel_unit_from_returns",
+  "column_break_iwqg",
+  "strength_returns",
+  "column_break_xjix",
+  "dtos",
+  "personnel_attachement_section",
+  "current_personnel_attachment",
+  "type",
+  "column_break_fjky",
+  "personnel_attachment_unit",
+  "personnel_attachment_remarks",
+  "atts__dets_type",
+  "section_break_zpop",
+  "personnel_unit_verified",
+  "posting_history_tab",
+  "personnel_posting_history_html",
+  "promotion_history_tab",
+  "personnel_promotion_history",
+  "courses_attended_tab",
+  "main_primary_specialty",
+  "column_break_vxwz",
+  "main_secondary_specialty",
+  "column_break_qoay",
+  "main_auxiliary_specialty",
+  "section_break_bozv",
+  "courses_attended",
+  "brief_tab",
+  "personnel_brief",
+  "mission_tab",
+  "personnel_mission",
+  "strength_returns_tab",
+  "personnel_strength_returns",
+  "personnel_attsdets_tab",
+  "personnel_attsdets"
+ ],
+ "fields": [
+  {
+   "fieldname": "service_number",
+   "fieldtype": "Data",
+   "label": "Service Number",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Category",
+   "options": "Personnel Category",
+   "reqd": 1
+  },
+  {
+   "fieldname": "personal_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "Personal Information"
+  },
+  {
+   "fieldname": "type_of_commission",
+   "fieldtype": "Link",
+   "label": "Type of Commission",
+   "options": "Type of Commission"
+  },
+  {
+   "fieldname": "course",
+   "fieldtype": "Link",
+   "label": "Course",
+   "options": "Course"
+  },
+  {
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "label": "First Name"
+  },
+  {
+   "fieldname": "surname",
+   "fieldtype": "Data",
+   "label": "Surname"
+  },
+  {
+   "fieldname": "personnel_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Personnel Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ayhz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date_of_last_promotion",
+   "fieldtype": "Date",
+   "label": "Date of Last Promotion",
+   "read_only": 1
+  },
+  {
+   "description": "** From Part 2 Order **",
+   "fieldname": "current_unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Current Unit",
+   "options": "Unit",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "current_unit.unit_location",
+   "fieldname": "current_unit_location",
+   "fieldtype": "Link",
+   "label": "Current Unit Location",
+   "options": "State",
+   "read_only": 1
+  },
+  {
+   "description": "** From Strength Returns**",
+   "fieldname": "current_deployment",
+   "fieldtype": "Data",
+   "label": "Current Deployment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_wwsz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "label": "Phone Number"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Data",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "posting_history_tab",
+   "fieldtype": "Tab Break",
+   "label": "Posting History"
+  },
+  {
+   "fieldname": "courses_attended_tab",
+   "fieldtype": "Tab Break",
+   "label": "Courses Attended"
+  },
+  {
+   "description": "Attach personnel passport here.",
+   "fieldname": "personnel_image",
+   "fieldtype": "Attach Image",
+   "label": "Personnel Image"
+  },
+  {
+   "fieldname": "promotion_history_tab",
+   "fieldtype": "Tab Break",
+   "label": "Promotion History"
+  },
+  {
+   "fieldname": "brief_tab",
+   "fieldtype": "Tab Break",
+   "label": "Brief"
+  },
+  {
+   "fieldname": "personnel_posting_history_html",
+   "fieldtype": "HTML",
+   "label": "Personnel Posting History HTML"
+  },
+  {
+   "fieldname": "personnel_promotion_history",
+   "fieldtype": "HTML",
+   "label": "Personnel Promotion History"
+  },
+  {
+   "fieldname": "courses_attended",
+   "fieldtype": "HTML",
+   "label": "Courses Attended"
+  },
+  {
+   "fieldname": "column_break_aubc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "**From Posting Record**",
+   "fieldname": "current_rank",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Current Rank",
+   "options": "Rank"
+  },
+  {
+   "fieldname": "personnel_brief",
+   "fieldtype": "HTML",
+   "label": "Personnel Brief"
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "HTML",
+   "label": "Image"
+  },
+  {
+   "fieldname": "column_break_tvrr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Attach personnel full picture here.",
+   "fieldname": "personnel_full_picture",
+   "fieldtype": "Attach",
+   "label": "Personnel Full Picture"
+  },
+  {
+   "fetch_from": "current_unit.region",
+   "fieldname": "current_unit_geopolitical_zone",
+   "fieldtype": "Link",
+   "label": "Current Unit Geopolitical Zone",
+   "options": "Geopolitical Zone",
+   "read_only": 1
+  },
+  {
+   "fieldname": "middle_name",
+   "fieldtype": "Data",
+   "label": "Middle Name"
+  },
+  {
+   "fieldname": "other_names",
+   "fieldtype": "Data",
+   "label": "Other Names"
+  },
+  {
+   "fieldname": "mission_tab",
+   "fieldtype": "Tab Break",
+   "label": "Mission"
+  },
+  {
+   "fieldname": "personnel_mission",
+   "fieldtype": "HTML",
+   "label": "Personnel Mission"
+  },
+  {
+   "fieldname": "phone_number_2",
+   "fieldtype": "Data",
+   "label": "Phone Number 2"
+  },
+  {
+   "fieldname": "operator",
+   "fieldtype": "Link",
+   "label": "Operator",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "course.date_of_enlistment",
+   "fieldname": "date_of_enlistment",
+   "fieldtype": "Date",
+   "label": "Date of Enlistment",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "course.date_of__commission",
+   "fieldname": "date_of__commission",
+   "fieldtype": "Date",
+   "label": "Date of  Commission",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_kxlt",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "data_import_reference",
+   "fieldtype": "Data",
+   "label": "Data Import Reference"
+  },
+  {
+   "fieldname": "strength_returns_tab",
+   "fieldtype": "Tab Break",
+   "label": "Strength Returns "
+  },
+  {
+   "fieldname": "personnel_strength_returns",
+   "fieldtype": "HTML",
+   "label": "Personnel Strength Returns "
+  },
+  {
+   "fieldname": "personnel_unit_reference_section",
+   "fieldtype": "Section Break",
+   "label": "Personnel Unit Reference"
+  },
+  {
+   "fieldname": "personnel_unit_from_returns",
+   "fieldtype": "Link",
+   "label": "Personnel Unit from Returns",
+   "options": "Unit",
+   "read_only": 1
+  },
+  {
+   "description": "Derived from Personnel Unit Verification Form",
+   "fieldname": "personnel_unit_verified",
+   "fieldtype": "Link",
+   "label": "Personnel Unit Verified",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_iwqg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "strength_returns",
+   "fieldtype": "Link",
+   "label": "Strength Returns",
+   "options": "Strength Returns"
+  },
+  {
+   "fieldname": "dtos",
+   "fieldtype": "Date",
+   "label": "DTOS"
+  },
+  {
+   "fieldname": "column_break_xjix",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_zpop",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "personnel_attachement_section",
+   "fieldtype": "Section Break",
+   "label": "Personnel Attachment"
+  },
+  {
+   "fieldname": "current_personnel_attachment",
+   "fieldtype": "Link",
+   "label": "Current Personnel Attachment",
+   "options": "Personnel Att and Dets Form",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "current_personnel_attachment.unit",
+   "fieldname": "personnel_attachment_unit",
+   "fieldtype": "Data",
+   "label": "Personnel Attachment Unit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_fjky",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "current_personnel_attachment.remarks",
+   "fieldname": "personnel_attachment_remarks",
+   "fieldtype": "Data",
+   "label": "Personnel Attachment Remarks",
+   "read_only": 1
+  },
+  {
+   "fieldname": "personnel_attsdets_tab",
+   "fieldtype": "Tab Break",
+   "label": "Personnel Atts/Dets"
+  },
+  {
+   "fieldname": "personnel_attsdets",
+   "fieldtype": "HTML",
+   "label": "Personnel Atts/Dets"
+  },
+  {
+   "fetch_from": "current_personnel_attachment.attsdets_type",
+   "fieldname": "atts__dets_type",
+   "fieldtype": "Data",
+   "label": "Atts / Dets Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "current_personnel_attachment.type",
+   "fieldname": "type",
+   "fieldtype": "Data",
+   "label": "Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "main_primary_specialty",
+   "fieldtype": "Data",
+   "label": "Main Primary Specialty"
+  },
+  {
+   "fieldname": "main_secondary_specialty",
+   "fieldtype": "Data",
+   "label": "Main Secondary Specialty"
+  },
+  {
+   "fieldname": "main_auxiliary_specialty",
+   "fieldtype": "Data",
+   "label": "Main Auxiliary Specialty"
+  },
+  {
+   "fieldname": "column_break_vxwz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_qoay",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_bozv",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
+ "image_field": "personnel_image",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-10 22:19:11.642149",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Personnel",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Personnel Creator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Personnel Reader"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Personnel Editor",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Personnel Deleter",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Posting Authority Reader",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Posting Authority Creator",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Posting Authority Editor",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Promotion Creator",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Promotion Editor",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Promotion Amender",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Part 2 Order Creator",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Part 2 Order Amender",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Part 2 Order Editor",
+   "share": 1
+  },
+  {
+   "read": 1,
+   "role": "Course Attended Creator",
+   "select": 1
+  },
+  {
+   "read": 1,
+   "role": "Course Attended Editor",
+   "select": 1
+  },
+  {
+   "read": 1,
+   "role": "Course Attended Amender",
+   "select": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Mission Creator",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Mission Editor",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Mission Reader",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Mission Amender",
+   "share": 1
+  },
+  {
+   "read": 1,
+   "role": "Can View Dashboard"
+  },
+  {
+   "read": 1,
+   "role": "Can View Real-Time Audit Log"
+  },
+  {
+   "read": 1,
+   "role": "Data Viewer"
+  },
+  {
+   "create": 1,
+   "import": 1,
+   "read": 1,
+   "role": "Can Import Data"
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

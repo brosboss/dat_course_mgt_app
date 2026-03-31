@@ -1,0 +1,148 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-02-27 15:48:42.865989",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "authority",
+  "column_break_jdvm",
+  "service_number",
+  "section_break_yzeg",
+  "first_name",
+  "middle_name",
+  "other_names",
+  "personnel_name",
+  "surname",
+  "column_break_gesi",
+  "new_name",
+  "new_middle_name",
+  "new_other_name",
+  "new_personnel_name",
+  "new_surname",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "authority",
+   "fieldtype": "Attach",
+   "label": "Authority"
+  },
+  {
+   "fieldname": "section_break_yzeg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_gesi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "new_name",
+   "fieldtype": "Data",
+   "label": "New First Name"
+  },
+  {
+   "fieldname": "service_number",
+   "fieldtype": "Link",
+   "label": "Service Number",
+   "options": "Personnel"
+  },
+  {
+   "fetch_from": "service_number.first_name",
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "label": "First Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "service_number.middle_name",
+   "fieldname": "middle_name",
+   "fieldtype": "Data",
+   "label": "Middle Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "service_number.other_names",
+   "fieldname": "other_names",
+   "fieldtype": "Data",
+   "label": "Other Names",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "service_number.personnel_name",
+   "fieldname": "personnel_name",
+   "fieldtype": "Data",
+   "label": "Personnel Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_jdvm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "new_middle_name",
+   "fieldtype": "Data",
+   "label": "New Middle Name"
+  },
+  {
+   "fieldname": "new_personnel_name",
+   "fieldtype": "Data",
+   "label": "New Personnel Name"
+  },
+  {
+   "fieldname": "new_other_name",
+   "fieldtype": "Data",
+   "label": "New Other Name"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Change of Name",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "service_number.surname",
+   "fieldname": "surname",
+   "fieldtype": "Data",
+   "label": "Surname",
+   "read_only": 1
+  },
+  {
+   "fieldname": "new_surname",
+   "fieldtype": "Data",
+   "label": "New Surname"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-02-28 12:34:37.041896",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Change of Name",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

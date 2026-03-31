@@ -1,0 +1,154 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-26 00:55:35.627993",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_zcpz",
+  "service_number",
+  "personnel_name",
+  "from_unit",
+  "to_unit",
+  "appointment",
+  "wef_date",
+  "posting_status",
+  "column_break_kwps",
+  "part_2_order",
+  "gaining_unit_date_tos",
+  "amended_from",
+  "overstay_in_loosing_unit"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_zcpz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "from_unit",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "From Unit",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "bold": 1,
+   "columns": 1,
+   "fieldname": "to_unit",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "To Unit",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "default": "Pending TOS",
+   "fieldname": "posting_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Posting Status",
+   "options": "Pending TOS\nTOS\nCancelled",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "appointment",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Appointment",
+   "options": "Appointment",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_kwps",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "part_2_order",
+   "fieldtype": "Link",
+   "label": "Part 2 Order",
+   "options": "Part 2 Order"
+  },
+  {
+   "columns": 1,
+   "fieldname": "gaining_unit_date_tos",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Gaining Unit Date TOS",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "service_number",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Service Number",
+   "options": "Personnel",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Posting Authority Details",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "columns": 1,
+   "fetch_from": "service_number.personnel_name",
+   "fieldname": "personnel_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Personnel Name",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "wef_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "WEF Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "overstay_in_loosing_unit",
+   "fieldtype": "Int",
+   "label": "Overstayed Days in Loosing Unit"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-26 03:57:34.299649",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Posting Authority Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

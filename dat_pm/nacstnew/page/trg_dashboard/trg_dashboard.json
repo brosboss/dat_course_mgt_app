@@ -1,0 +1,23 @@
+{
+ "content": null,
+ "creation": "2026-03-28 19:33:29.949990",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-03-28 19:33:29.949990",
+ "modified_by": "Administrator",
+ "module": "nacstnew",
+ "name": "trg-dashboard",
+ "owner": "Administrator",
+ "page_name": "trg-dashboard",
+ "roles": [
+  {
+   "role": "All"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 1,
+ "title": "TRG Dashboard"
+}

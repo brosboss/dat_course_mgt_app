@@ -1,0 +1,59 @@
+{
+	"info": {
+		"name": "Change of Name API",
+		"description": "API collection for Change of Name doctype",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create and Submit Change of Name",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "api_key:api_secret",
+						"description": "Replace with your API key and secret, or use Cookie authentication"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"service_number\": \"12345\",\n  \"new_name\": \"John\",\n  \"new_middle_name\": \"Michael\",\n  \"new_surname\": \"Doe\",\n  \"new_personnel_name\": \"JM Doe\",\n  \"new_other_name\": \"\",\n  \"authority\": \"\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/method/nacstnew.nacstnew.doctype.change_of_name.change_of_name.create_and_submit_change_of_name",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"method",
+						"nacstnew.nacstnew.doctype.change_of_name.change_of_name.create_and_submit_change_of_name"
+					]
+				},
+				"description": "Creates and submits a Change of Name document, which automatically updates the Personnel record.\n\n**Required:**\n- service_number\n\n**Optional (at least one required):**\n- new_name\n- new_middle_name\n- new_other_name\n- new_personnel_name\n- new_surname\n- authority"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		}
+	]
+}
+
+
+
+

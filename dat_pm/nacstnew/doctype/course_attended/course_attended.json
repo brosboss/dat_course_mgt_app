@@ -1,0 +1,253 @@
+{
+ "actions": [],
+ "autoname": "format:{service_number}-{course_reference}",
+ "creation": "2025-12-26 11:06:12.373183",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "legacy_record",
+  "section_break_kmdp",
+  "course_reference",
+  "column_break_gglj",
+  "specialty",
+  "section_break_mibt",
+  "service_number",
+  "personnel_name",
+  "course_name",
+  "course_start_date",
+  "course_end_date",
+  "column_break_ejco",
+  "course_report",
+  "grade",
+  "operator",
+  "auditor",
+  "section_break_wftm",
+  "document_view",
+  "amended_from",
+  "officer_course_status"
+ ],
+ "fields": [
+  {
+   "fieldname": "service_number",
+   "fieldtype": "Link",
+   "label": "Service Number",
+   "options": "Personnel",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "service_number.personnel_name",
+   "fieldname": "personnel_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Personnel Name",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "course_name",
+   "fieldtype": "Link",
+   "label": "Course Name",
+   "options": "Course Name"
+  },
+  {
+   "fieldname": "course_start_date",
+   "fieldtype": "Date",
+   "label": "Course Start Date"
+  },
+  {
+   "fieldname": "course_end_date",
+   "fieldtype": "Date",
+   "label": "Course End Date"
+  },
+  {
+   "fieldname": "column_break_ejco",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Only PDF documents are allowed",
+   "fieldname": "course_report",
+   "fieldtype": "Attach",
+   "label": "Course Report"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_wftm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "document_view",
+   "fieldtype": "HTML",
+   "label": "Document View"
+  },
+  {
+   "fieldname": "grade",
+   "fieldtype": "Link",
+   "label": "Grade",
+   "options": "Grade"
+  },
+  {
+   "fieldname": "operator",
+   "fieldtype": "Link",
+   "label": "Operator",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "auditor",
+   "fieldtype": "Link",
+   "label": "Auditor",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Course Attended",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "course_reference",
+   "fieldtype": "Data",
+   "label": "Course Reference",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "section_break_mibt",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "description": "Records entered retrospectively where original reference documents are unavailable.",
+   "fieldname": "legacy_record",
+   "fieldtype": "Check",
+   "label": "Legacy Record"
+  },
+  {
+   "fieldname": "section_break_kmdp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_gglj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "specialty",
+   "fieldtype": "Select",
+   "label": "Specialty",
+   "options": "\nPrimary Specialty\nSecondary Specialty\nAuxiliary Specialty",
+   "reqd": 1
+  },
+  {
+   "fieldname": "officer_course_status",
+   "fieldtype": "Select",
+   "label": "Officer Course Status",
+   "options": "Upcoming\nOn Course\nCompleted\nDeferred\nAbsent\nOverdue"
+  }
+ ],
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-03-28 19:30:51.104305",
+ "modified_by": "Administrator",
+ "module": "nacstnew",
+ "name": "Course Attended",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Course Attended Creator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Course Attended Reader"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Course Attended Editor",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Course Attended Deleter",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Course Attended Submitter",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Course Attended Canceller",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Course Attended Amender",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

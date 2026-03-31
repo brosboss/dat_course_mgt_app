@@ -1,0 +1,23 @@
+{
+ "content": null,
+ "creation": "2025-12-29 22:28:37.983567",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2025-12-29 22:28:37.983567",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "audit-log",
+ "owner": "Administrator",
+ "page_name": "audit-log",
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 1,
+ "title": "audit_log"
+}

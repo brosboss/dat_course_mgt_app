@@ -1,0 +1,26 @@
+{
+ "content": null,
+ "creation": "2025-12-30 12:00:00",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2025-12-30 09:32:36.702466",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "rtal",
+ "owner": "Administrator",
+ "page_name": "rtal",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Can View Real-Time Audit Log"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 1,
+ "title": "Real-Time Audit Log"
+}

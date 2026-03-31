@@ -1,0 +1,117 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-02-28 17:52:55.006890",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "years_in_current_unit",
+  "column_break_zpaj",
+  "priimary_specialty_course",
+  "column_break_wpzk",
+  "secondary_specialty_course",
+  "column_break_lpwj",
+  "auxiliary_specialty_course",
+  "section_break_nawv",
+  "exact_match",
+  "section_break_yppk",
+  "personnel_list",
+  "section_break_ezlo",
+  "posting_proposal_analysis_list"
+ ],
+ "fields": [
+  {
+   "fieldname": "years_in_current_unit",
+   "fieldtype": "Int",
+   "label": "Years in Current Unit"
+  },
+  {
+   "fieldname": "priimary_specialty_course",
+   "fieldtype": "Link",
+   "label": "Priimary Specialty Course",
+   "options": "Course Name"
+  },
+  {
+   "fieldname": "secondary_specialty_course",
+   "fieldtype": "Link",
+   "label": "Secondary Specialty Course",
+   "options": "Course Name"
+  },
+  {
+   "fieldname": "auxiliary_specialty_course",
+   "fieldtype": "Link",
+   "label": " Auxiliary Specialty Course",
+   "options": "Course Name"
+  },
+  {
+   "default": "0",
+   "description": "When checked, only personnel whose stored specialty exactly matches the selected course name are shown. When unchecked, ancestors and descendants of the selected course are also considered a match.",
+   "fieldname": "exact_match",
+   "fieldtype": "Check",
+   "label": "Exact Specialty Match Only"
+  },
+  {
+   "fieldname": "section_break_ezlo",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "posting_proposal_analysis_list",
+   "fieldtype": "Table",
+   "label": "Posting Proposal Analysis List",
+   "options": "Posting Proposal Analysis List"
+  },
+  {
+   "fieldname": "column_break_zpaj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_wpzk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_lpwj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_yppk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "personnel_list",
+   "fieldtype": "HTML",
+   "label": "Personnel List"
+  },
+  {
+   "fieldname": "section_break_nawv",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-04 21:53:41.787353",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Posting Proposal Analysis",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,225 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"mm2RxS1l98\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">ADMIN Dashboard</span>\",\"col\":12}},{\"id\":\"IUZJcePjKs\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"State\",\"col\":3}},{\"id\":\"Wxa7dPTkgB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Unit\",\"col\":3}},{\"id\":\"wxRLvsrvbJ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Rank\",\"col\":3}},{\"id\":\"eVD1JXRCFE\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Commander Appointment\",\"col\":3}},{\"id\":\"WqlyR-WKSn\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Type of Commission\",\"col\":3}},{\"id\":\"yb6MYVR8Vn\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Grade\",\"col\":3}},{\"id\":\"UvB0BMka3i\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Course\",\"col\":3}},{\"id\":\"u2nZIFmKlr\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Appointment\",\"col\":3}},{\"id\":\"MVvqj-TbAY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Course Name\",\"col\":3}},{\"id\":\"q5lSsUXwfx\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mission Name\",\"col\":3}},{\"id\":\"k42309NxAn\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Personnel Category\",\"col\":3}},{\"id\":\"sGY7SWNCtQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Reference Data Manager\",\"col\":3}},{\"id\":\"S0jZNVXn61\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"4c1tvJ4MCO\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Personnel\",\"col\":3}},{\"id\":\"0_Cj2JBFJy\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Course Attended\",\"col\":3}},{\"id\":\"jzMZFRusy2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Posting Authority\",\"col\":3}},{\"id\":\"3tM6MAyUxQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Part 2 Order\",\"col\":3}},{\"id\":\"uQ9liWa4OB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Promotion\",\"col\":3}},{\"id\":\"R2olJKOiOm\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mission\",\"col\":3}},{\"id\":\"VDvnI725FI\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Create Operator\",\"col\":3}},{\"id\":\"f_pfF1hjlx\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"N_A3FnFFlh\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Personnel\",\"col\":3}},{\"id\":\"366X7eKWck\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Course Attended\",\"col\":3}},{\"id\":\"wTRGBMvDqs\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Posting Authority\",\"col\":3}},{\"id\":\"F25JmO07fr\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Part 2 Order\",\"col\":3}},{\"id\":\"dJrTXK2JQp\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Promotion\",\"col\":3}},{\"id\":\"KeSqVRm13F\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"wDHAKcRV2_\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Analysis Page\",\"col\":3}},{\"id\":\"W0bSqMkhVc\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Data Import\",\"col\":3}}]",
+ "creation": "2025-12-26 11:14:00.807941",
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "color-review-points",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "ADMIN Dashboard",
+ "links": [],
+ "modified": "2026-03-31 17:08:00.062678",
+ "modified_by": "Administrator",
+ "module": "nacstnew",
+ "name": "ADMIN Dashboard",
+ "number_cards": [
+  {
+   "label": "Course Attended",
+   "number_card_name": "Course Attended"
+  },
+  {
+   "label": "Posting Authority",
+   "number_card_name": "Posting Authority"
+  },
+  {
+   "label": "Part 2 Order",
+   "number_card_name": "Part 2 Order"
+  },
+  {
+   "label": "Personnel",
+   "number_card_name": "Personnel"
+  },
+  {
+   "label": "Promotion",
+   "number_card_name": "Promotion"
+  }
+ ],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "Administrator"
+  },
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Can View Dashboard"
+  }
+ ],
+ "sequence_id": 1.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Analysis Page",
+   "link_to": "personnel-list",
+   "type": "Page"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Reference Data Manager",
+   "link_to": "Reference Data Manager",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "State",
+   "link_to": "State",
+   "stats_filter": "[[\"State\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Data Import",
+   "link_to": "Data Import",
+   "stats_filter": "[[\"Data Import\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Commander Appointment",
+   "link_to": "Commander Appointment",
+   "stats_filter": "[[\"Commander Appointment\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Promotion",
+   "link_to": "Promotion",
+   "stats_filter": "[[\"Promotion\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Mission Name",
+   "link_to": "Mission Name",
+   "stats_filter": "[[\"Mission Name\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Create Operator",
+   "link_to": "Create Operator",
+   "stats_filter": "[[\"Create Operator\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Mission",
+   "link_to": "Mission",
+   "stats_filter": "[[\"Mission\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Unit",
+   "link_to": "Unit",
+   "stats_filter": "[[\"Unit\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Course Attended",
+   "link_to": "Course Attended",
+   "stats_filter": "[[\"Course Attended\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Rank",
+   "link_to": "Rank",
+   "stats_filter": "[[\"Rank\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Appointment",
+   "link_to": "Appointment",
+   "stats_filter": "[[\"Appointment\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Grade",
+   "link_to": "Grade",
+   "stats_filter": "[[\"Grade\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Personnel Category",
+   "link_to": "Personnel Category",
+   "stats_filter": "[[\"Personnel Category\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Type of Commission",
+   "link_to": "Type of Commission",
+   "stats_filter": "[[\"Type of Commission\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Course Name",
+   "link_to": "Course Name",
+   "stats_filter": "[[\"Course Name\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Personnel",
+   "link_to": "Personnel",
+   "stats_filter": "[[\"Personnel\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Course",
+   "link_to": "Course",
+   "stats_filter": "[[\"Course\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Posting Authority",
+   "link_to": "Posting Authority",
+   "stats_filter": "[[\"Posting Authority\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Part 2 Order",
+   "link_to": "Part 2 Order",
+   "stats_filter": "[[\"Part 2 Order\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  }
+ ],
+ "title": "ADMIN Dashboard"
+}

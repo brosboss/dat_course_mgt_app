@@ -1,0 +1,235 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:part_2_order_reference",
+ "creation": "2025-12-25 18:58:15.581884",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "legacy_record",
+  "section_break_kmdp",
+  "part_2_order_reference",
+  "column_break_nhmm",
+  "attach",
+  "section_break_wlhf",
+  "column_break_lzfi",
+  "reference",
+  "column_break_nnup",
+  "date",
+  "operator",
+  "auditor",
+  "section_break_wftm",
+  "document_view",
+  "section_break_rcae",
+  "unit_tos_record",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "allow_on_submit": 1,
+   "fieldname": "unit_tos_record",
+   "fieldtype": "Table",
+   "label": "Unit TOS Record",
+   "options": "Unit TOS Record"
+  },
+  {
+   "fieldname": "part_2_order_reference",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Part 2 Order Reference",
+   "read_only": 1,
+   "reqd": 1,
+   "set_only_once": 1,
+   "unique": 1
+  },
+  {
+   "description": "Only PDF documents are allowed",
+   "fieldname": "attach",
+   "fieldtype": "Attach",
+   "label": "Attach"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_wftm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "document_view",
+   "fieldtype": "HTML",
+   "label": "Document View"
+  },
+  {
+   "fieldname": "column_break_nnup",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_rcae",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_wlhf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_lzfi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference",
+   "fieldtype": "Data",
+   "label": "Reference",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "operator",
+   "fieldtype": "Link",
+   "label": "Operator",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "auditor",
+   "fieldtype": "Link",
+   "label": "Auditor",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_nhmm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Part 2 Order",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "default": "0",
+   "description": "Records entered retrospectively where original reference documents are unavailable.",
+   "fieldname": "legacy_record",
+   "fieldtype": "Check",
+   "label": "Legacy Record"
+  },
+  {
+   "fieldname": "section_break_kmdp",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-31 14:00:28.731029",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Part 2 Order",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Part 2 Order Creator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Part 2 Order Reader"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Part 2 Order Editor",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Part 2 Order Deleter",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Part 2 Order Submitter",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Part 2 Order Canceller",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Part 2 Order Amender",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

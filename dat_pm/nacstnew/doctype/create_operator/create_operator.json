@@ -1,0 +1,143 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:email",
+ "creation": "2025-12-30 18:50:10.555479",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "email",
+  "first_name",
+  "column_break_alnv",
+  "password",
+  "enabled",
+  "module_profile",
+  "section_break_login_restrictions",
+  "login_after",
+  "login_before",
+  "section_break_nlgh",
+  "app_roles_assigned_list",
+  "column_break_sxnk",
+  "roles_html"
+ ],
+ "fields": [
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Email",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "First Name",
+   "reqd": 1
+  },
+  {
+   "default": "No Module",
+   "fieldname": "module_profile",
+   "fieldtype": "Link",
+   "label": "Module Profile",
+   "options": "Module Profile",
+   "read_only": 1
+  },
+  {
+   "fieldname": "password",
+   "fieldtype": "Data",
+   "label": "Password"
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "roles_html",
+   "fieldtype": "HTML",
+   "label": "Roles",
+   "read_only": 1
+  },
+  {
+   "fieldname": "app_roles_assigned_list",
+   "fieldtype": "Table",
+   "label": "APP Roles Assigned List",
+   "options": "APP Roles Assigned List",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_alnv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_login_restrictions",
+   "fieldtype": "Section Break",
+   "label": "Login Restrictions"
+  },
+  {
+   "description": "Allow user to login only after this hour (0-24). For example, set to 8 to allow login from 8:00 AM onwards. Leave empty to allow login at any time.",
+   "fieldname": "login_after",
+   "fieldtype": "Int",
+   "label": "Login After (Hour)"
+  },
+  {
+   "description": "Allow user to login only before this hour (0-24). For example, set to 18 to allow login until 6:00 PM. Leave empty to allow login at any time.",
+   "fieldname": "login_before",
+   "fieldtype": "Int",
+   "label": "Login Before (Hour)"
+  },
+  {
+   "fieldname": "section_break_nlgh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_sxnk",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-10 18:50:10.700587",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Create Operator",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Database Operator Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

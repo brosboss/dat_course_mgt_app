@@ -1,0 +1,1 @@
+bench --site [your-site-name] execute nacstnew.utils.create_personnel_roles.create_personnel_roles

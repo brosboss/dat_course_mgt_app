@@ -1,0 +1,56 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"QojBEcOXNm\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Returns Management</span>\",\"col\":12}},{\"id\":\"Yhz6zKVQKA\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Strength Returns\",\"col\":4}},{\"id\":\"0J8MnLYKpd\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Personnel Unit Verification Form\",\"col\":4}},{\"id\":\"BPJSzM38A9\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Personnel Att and Dets Form\",\"col\":4}}]",
+ "creation": "2026-01-19 13:08:23.541752",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "color-monthly-rank",
+ "idx": 0,
+ "indicator_color": "gray",
+ "is_hidden": 0,
+ "label": "Returns Management",
+ "links": [],
+ "modified": "2026-01-20 09:34:37.803049",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Returns Management",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "Administrator"
+  },
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Can View Dashboard"
+  }
+ ],
+ "sequence_id": 23.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Strength Returns",
+   "link_to": "Strength Returns",
+   "stats_filter": "[[\"Strength Returns\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Personnel Att and Dets Form",
+   "link_to": "Personnel Att and Dets Form",
+   "stats_filter": "[]",
+   "type": "DocType"
+  }
+ ],
+ "title": "Returns Management"
+}

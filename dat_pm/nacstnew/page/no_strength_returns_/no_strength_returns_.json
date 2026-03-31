@@ -1,0 +1,23 @@
+{
+ "content": null,
+ "creation": "2026-01-20 10:24:07.267541",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-01-20 10:24:07.267541",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "no-strength-returns-",
+ "owner": "Administrator",
+ "page_name": "no-strength-returns-",
+ "roles": [
+  {
+   "role": "Can View Dashboard"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 1,
+ "title": "Per with No Strength Returns Record"
+}

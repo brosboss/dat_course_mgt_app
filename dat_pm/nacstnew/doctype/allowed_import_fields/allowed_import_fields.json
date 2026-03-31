@@ -1,0 +1,35 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-13 13:31:55.334302",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "allowed_import_fields"
+ ],
+ "fields": [
+  {
+   "fieldname": "allowed_import_fields",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Allowed Import Fields",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-13 14:10:37.554902",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Allowed Import Fields",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

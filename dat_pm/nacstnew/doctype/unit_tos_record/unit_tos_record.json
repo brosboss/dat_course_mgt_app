@@ -1,0 +1,103 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-25 19:00:20.101042",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "posting_authority",
+  "service_number",
+  "personnel_name",
+  "from_unit",
+  "to_unit",
+  "date_tos"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "posting_authority",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Posting Authority",
+   "options": "Posting Authority",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "service_number",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Service Number",
+   "options": "Personnel",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fetch_from": "service_number.personnel_name",
+   "fieldname": "personnel_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Personnel Name",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "from_unit",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "From Unit",
+   "options": "Unit",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "to_unit",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "To Unit",
+   "options": "Unit",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "date_tos",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date TOS",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-26 02:46:14.722088",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Unit TOS Record",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

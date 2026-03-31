@@ -1,0 +1,145 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-19 13:10:46.109093",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "personnel",
+  "personnel_name",
+  "rank",
+  "trade",
+  "column_break_jpmv",
+  "dob",
+  "doe",
+  "dolp",
+  "current_depl",
+  "dtos",
+  "section_break_xmqq",
+  "last_unit",
+  "column_break_rsuw",
+  "last_second_unit",
+  "column_break_rkyv",
+  "last_third_unit",
+  "section_break_yapr",
+  "remarks"
+ ],
+ "fields": [
+  {
+   "fieldname": "personnel",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Personnel",
+   "options": "Personnel",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "personnel.personnel_name",
+   "fieldname": "personnel_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Personnel Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rank",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Rank",
+   "options": "Rank"
+  },
+  {
+   "fieldname": "trade",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Trade",
+   "options": "Trade"
+  },
+  {
+   "fieldname": "dob",
+   "fieldtype": "Date",
+   "label": "DOB"
+  },
+  {
+   "fieldname": "doe",
+   "fieldtype": "Date",
+   "label": "DOE"
+  },
+  {
+   "fieldname": "dolp",
+   "fieldtype": "Date",
+   "label": "DOLP"
+  },
+  {
+   "fieldname": "dtos",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "DTOS"
+  },
+  {
+   "fieldname": "current_depl",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Current Depl",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "last_unit",
+   "fieldtype": "Link",
+   "label": "Last Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "last_second_unit",
+   "fieldtype": "Link",
+   "label": "Last Second Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "last_third_unit",
+   "fieldtype": "Link",
+   "label": "Last Third Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Data",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "column_break_jpmv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_xmqq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_rsuw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_rkyv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_yapr",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-01-19 14:58:30.390665",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Strength Returns Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

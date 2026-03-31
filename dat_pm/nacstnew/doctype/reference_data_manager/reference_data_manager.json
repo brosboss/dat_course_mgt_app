@@ -1,0 +1,146 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-02-27 15:39:04.547775",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "unit",
+  "rank",
+  "course",
+  "column_break_ebhf",
+  "course_name",
+  "mission_name",
+  "personnel_category",
+  "column_break_lloz",
+  "grade",
+  "year",
+  "state",
+  "section_break_scyn",
+  "type_of_commission",
+  "column_break_isxh",
+  "commander_appointment",
+  "column_break_otyp",
+  "appointment"
+ ],
+ "fields": [
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "rank",
+   "fieldtype": "Link",
+   "label": "Rank",
+   "options": "Rank"
+  },
+  {
+   "fieldname": "course",
+   "fieldtype": "Link",
+   "label": "Course",
+   "options": "Course"
+  },
+  {
+   "fieldname": "column_break_ebhf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "course_name",
+   "fieldtype": "Data",
+   "label": "Course Name"
+  },
+  {
+   "fieldname": "mission_name",
+   "fieldtype": "Link",
+   "label": "Mission Name",
+   "options": "Mission Name"
+  },
+  {
+   "fieldname": "personnel_category",
+   "fieldtype": "Link",
+   "label": "Personnel Category",
+   "options": "Personnel Category"
+  },
+  {
+   "fieldname": "column_break_lloz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grade",
+   "fieldtype": "Link",
+   "label": "Grade",
+   "options": "Grade"
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Link",
+   "label": "Year",
+   "options": "Year"
+  },
+  {
+   "fieldname": "state",
+   "fieldtype": "Link",
+   "label": "State",
+   "options": "State"
+  },
+  {
+   "fieldname": "section_break_scyn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "type_of_commission",
+   "fieldtype": "Link",
+   "label": "Type of Commission",
+   "options": "Type of Commission"
+  },
+  {
+   "fieldname": "column_break_isxh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "commander_appointment",
+   "fieldtype": "Link",
+   "label": "Commander Appointment",
+   "options": "Commander Appointment"
+  },
+  {
+   "fieldname": "column_break_otyp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "appointment",
+   "fieldtype": "Link",
+   "label": "Appointment",
+   "options": "Appointment"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-02-27 15:46:22.417954",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Reference Data Manager",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

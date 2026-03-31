@@ -1,0 +1,23 @@
+{
+ "content": null,
+ "creation": "2026-03-10 23:21:58.361498",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-03-10 23:21:58.361498",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "personnel-course-det",
+ "owner": "Administrator",
+ "page_name": "personnel-course-det",
+ "roles": [
+  {
+   "role": "All"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 1,
+ "title": "Personnel Course Details"
+}

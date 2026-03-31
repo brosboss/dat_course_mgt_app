@@ -1,0 +1,26 @@
+{
+ "content": null,
+ "creation": "2025-12-26 06:00:04.206719",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2025-12-31 15:38:55.721021",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "personnel-record",
+ "owner": "Administrator",
+ "page_name": "personnel-record",
+ "roles": [
+  {
+   "role": "Administrator"
+  },
+  {
+   "role": "Data Viewer"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 1,
+ "title": "personnel-record"
+}
