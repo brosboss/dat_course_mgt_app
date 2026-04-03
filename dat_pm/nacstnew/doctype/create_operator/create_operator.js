@@ -71,22 +71,140 @@ frappe.ui.form.on("Create Operator", {
 			});
 		}
 		
-		// Ensure mandatory roles are always assigned
-		frm.trigger("ensure_can_view_dashboard");
-		frm.trigger("ensure_personnel_reader");
+		// Ensure mandatory roles (or feedback-only role) on load
+		if (!cint(frm.doc.access_feedback_only)) {
+			frm.trigger("ensure_can_view_dashboard");
+			frm.trigger("ensure_personnel_reader");
+		}
 		
 		// Populate roles HTML with checkboxes
 		frm.trigger("populate_roles_html");
 		
 		// Sync child table with checkboxes after a short delay to ensure HTML is rendered
 		setTimeout(function() {
-			frm.trigger("sync_child_table_with_checkboxes");
-			// Ensure mandatory roles checkboxes are checked after HTML is rendered
-			setTimeout(function() {
-				frm.trigger("ensure_can_view_dashboard");
-				frm.trigger("ensure_personnel_reader");
-			}, 100);
+			if (!cint(frm.doc.access_feedback_only)) {
+				frm.trigger("sync_child_table_with_checkboxes");
+				setTimeout(function() {
+					frm.trigger("ensure_can_view_dashboard");
+					frm.trigger("ensure_personnel_reader");
+				}, 100);
+			} else {
+				frm.trigger("update_roles_interaction_state");
+			}
 		}, 500);
+	},
+
+	access_feedback_only(frm) {
+		if (cint(frm.doc.access_feedback_only)) {
+			frm.trigger("ensure_feedback_only_role");
+		} else {
+			frm.trigger("restore_standard_roles_after_feedback_only");
+		}
+	},
+
+	ensure_feedback_only_role(frm) {
+		frappe.call({
+			method: "frappe.client.get_value",
+			args: {
+				doctype: "App Role List",
+				filters: { app_role: "Can Only Access Feedback" },
+				fieldname: "name",
+			},
+			callback: function (r) {
+				if (!r.message || !r.message.name) {
+					frappe.msgprint({
+						title: __("Missing Role"),
+						message: __(
+							"'Can Only Access Feedback' role must exist in App Role List. Please create it first."
+						),
+						indicator: "red",
+					});
+					frm.set_value("access_feedback_only", 0);
+					return;
+				}
+				frm.clear_table("app_roles_assigned_list");
+				let row = frm.add_child("app_roles_assigned_list");
+				row.app_role = r.message.name;
+				frm.refresh_field("app_roles_assigned_list");
+				frm.trigger("populate_roles_html");
+				frm.dirty();
+			},
+		});
+	},
+
+	restore_standard_roles_after_feedback_only(frm) {
+		frappe.call({
+			method: "frappe.client.get_list",
+			args: {
+				doctype: "App Role List",
+				filters: { app_role: ["in", ["Can View Dashboard", "Personnel Reader"]] },
+				fields: ["name", "app_role"],
+				limit_page_length: 10,
+			},
+			callback: function (r) {
+				if (!r.message || r.message.length < 2) {
+					frappe.msgprint({
+						title: __("Missing Role"),
+						message: __(
+							"'Can View Dashboard' and 'Personnel Reader' must exist in App Role List."
+						),
+						indicator: "red",
+					});
+					return;
+				}
+				let by_app_role = {};
+				r.message.forEach((row) => {
+					by_app_role[row.app_role] = row.name;
+				});
+				frm.clear_table("app_roles_assigned_list");
+				["Can View Dashboard", "Personnel Reader"].forEach(function (label) {
+					if (by_app_role[label]) {
+						let child = frm.add_child("app_roles_assigned_list");
+						child.app_role = by_app_role[label];
+					}
+				});
+				frm.refresh_field("app_roles_assigned_list");
+				frm.trigger("populate_roles_html");
+				frm.dirty();
+			},
+		});
+	},
+
+	update_roles_interaction_state(frm) {
+		if (!frm.fields_dict.roles_html || !frm.fields_dict.roles_html.$wrapper) {
+			return;
+		}
+		let $wrap = frm.fields_dict.roles_html.$wrapper;
+		let feedback_only = cint(frm.doc.access_feedback_only);
+		if (feedback_only) {
+			let assigned = (frm.doc.app_roles_assigned_list || []).map((row) => row.app_role);
+			$wrap.find(".role-checkbox").each(function () {
+				let $cb = $(this);
+				let role_name = $cb.data("role-name");
+				$cb.prop("checked", assigned.includes(role_name));
+				$cb.prop("disabled", true);
+			});
+			$wrap
+				.find(".role-item label")
+				.css({ cursor: "not-allowed", opacity: 0.95 });
+			$(".role-selection-buttons button")
+				.prop("disabled", true)
+				.addClass("disabled");
+			$wrap.find(".roles-checklist").css("opacity", "0.88");
+		} else {
+			$wrap.find(".role-checkbox").each(function () {
+				let $cb = $(this);
+				let is_mandatory = $cb.data("mandatory") === true;
+				$cb.prop("disabled", is_mandatory);
+			});
+			$wrap
+				.find(".role-item label")
+				.css({ cursor: "", opacity: "" });
+			$(".role-selection-buttons button")
+				.prop("disabled", false)
+				.removeClass("disabled");
+			$wrap.find(".roles-checklist").css("opacity", "1");
+		}
 	},
 	
 	populate_roles_html(frm) {
@@ -104,6 +222,7 @@ frappe.ui.form.on("Create Operator", {
 			},
 			callback: function(r) {
 				console.log("App Role List response:", r);
+				let feedback_only = cint(frm.doc.access_feedback_only);
 				
 				if (r.message && r.message.length > 0) {
 					// Get currently assigned roles
@@ -202,6 +321,7 @@ frappe.ui.form.on("Create Operator", {
 									let role_display = role.app_role || role.name;
 									let is_mandatory = role.app_role === "Can View Dashboard" || role.app_role === "Personnel Reader";
 									let mandatory_attr = is_mandatory ? 'data-mandatory="true"' : '';
+									let is_disabled = is_mandatory || feedback_only;
 									
 									html += `
 										<div class="checkbox role-item" style="
@@ -211,7 +331,7 @@ frappe.ui.form.on("Create Operator", {
 											transition: background-color 0.2s ease;
 										" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='transparent'">
 											<label style="
-												cursor: pointer; 
+												cursor: ${is_disabled ? 'not-allowed' : 'pointer'}; 
 												font-weight: normal; 
 												display: flex; 
 												align-items: center; 
@@ -224,11 +344,11 @@ frappe.ui.form.on("Create Operator", {
 													data-role-name="${frappe.utils.escape_html(role.name)}" 
 													${mandatory_attr}
 													${checked} 
-													${is_mandatory ? 'disabled' : ''}
+													${is_disabled ? 'disabled' : ''}
 													style="
 														margin-right: 8px; 
 														margin-top: 0; 
-														cursor: ${is_mandatory ? 'not-allowed' : 'pointer'};
+														cursor: ${is_disabled ? 'not-allowed' : 'pointer'};
 														width: 14px;
 														height: 14px;
 														accent-color: #007bff;
@@ -261,9 +381,13 @@ frappe.ui.form.on("Create Operator", {
 						
 						// Sync child table with checkboxes on initial load
 						frm.trigger("sync_child_table_with_checkboxes");
+						frm.trigger("update_roles_interaction_state");
 						
 						// Bind checkbox change events
 						frm.fields_dict.roles_html.$wrapper.find('.role-checkbox').on('change', function() {
+							if (cint(frm.doc.access_feedback_only)) {
+								return;
+							}
 							let $checkbox = $(this);
 							let role_name = $checkbox.data('role-name');
 							let is_checked = $checkbox.is(':checked');
@@ -357,6 +481,7 @@ frappe.ui.form.on("Create Operator", {
 						frm.fields_dict.roles_html.$wrapper.html(html);
 						// Add buttons if roles are available
 						setup_role_selection_buttons(frm);
+						frm.trigger("update_roles_interaction_state");
 					}
 				}
 			},
@@ -403,6 +528,9 @@ frappe.ui.form.on("Create Operator", {
 	},
 	
 	sync_child_table_with_checkboxes(frm) {
+		if (cint(frm.doc.access_feedback_only)) {
+			return;
+		}
 		// Ensure child table matches checked roles in HTML
 		if (!frm.fields_dict.roles_html || !frm.fields_dict.roles_html.$wrapper) {
 			return;
@@ -450,6 +578,23 @@ frappe.ui.form.on("Create Operator", {
 	},
 	
 	app_roles_assigned_list(frm) {
+		if (cint(frm.doc.access_feedback_only)) {
+			if (frm.fields_dict.roles_html && frm.fields_dict.roles_html.$wrapper) {
+				let assigned_roles = [];
+				if (frm.doc.app_roles_assigned_list) {
+					assigned_roles = frm.doc.app_roles_assigned_list.map(row => row.app_role);
+				}
+				frm.fields_dict.roles_html.$wrapper.find('.role-checkbox').each(function() {
+					let $checkbox = $(this);
+					let role_name = $checkbox.data('role-name');
+					let should_be_checked = assigned_roles.includes(role_name);
+					if ($checkbox.is(':checked') !== should_be_checked) {
+						$checkbox.prop('checked', should_be_checked);
+					}
+				});
+			}
+			return;
+		}
 		// Prevent removal of mandatory roles ("Can View Dashboard" and "Personnel Reader")
 		let mandatory_roles = ["Can View Dashboard", "Personnel Reader"];
 		let roles_to_check = [];
@@ -560,12 +705,17 @@ frappe.ui.form.on("Create Operator", {
 			frappe.validated = false;
 		}
 		
-		// Ensure mandatory roles are assigned
-		frm.trigger("ensure_can_view_dashboard");
-		frm.trigger("ensure_personnel_reader");
+		// Ensure mandatory roles are assigned (feedback-only mode enforced on server)
+		if (!cint(frm.doc.access_feedback_only)) {
+			frm.trigger("ensure_can_view_dashboard");
+			frm.trigger("ensure_personnel_reader");
+		}
 	},
 	
 	ensure_can_view_dashboard(frm) {
+		if (cint(frm.doc.access_feedback_only)) {
+			return;
+		}
 		// Find "Can View Dashboard" role in App Role List
 		frappe.call({
 			method: "frappe.client.get_value",
@@ -618,6 +768,9 @@ frappe.ui.form.on("Create Operator", {
 	},
 	
 	ensure_personnel_reader(frm) {
+		if (cint(frm.doc.access_feedback_only)) {
+			return;
+		}
 		// Find "Personnel Reader" role in App Role List
 		frappe.call({
 			method: "frappe.client.get_value",
@@ -722,6 +875,9 @@ function setup_role_selection_buttons(frm) {
 
 // Select All Roles function
 function select_all_roles(frm) {
+	if (cint(frm.doc.access_feedback_only)) {
+		return;
+	}
 	if (!frm.fields_dict.roles_html || !frm.fields_dict.roles_html.$wrapper) {
 		return;
 	}
@@ -762,6 +918,9 @@ function select_all_roles(frm) {
 
 // Unselect All Roles function (keeps mandatory roles selected)
 function unselect_all_roles(frm) {
+	if (cint(frm.doc.access_feedback_only)) {
+		return;
+	}
 	if (!frm.fields_dict.roles_html || !frm.fields_dict.roles_html.$wrapper) {
 		return;
 	}

@@ -8,10 +8,13 @@
  "field_order": [
   "email",
   "first_name",
+  "service_number",
+  "personnel_name",
   "column_break_alnv",
   "password",
   "enabled",
   "module_profile",
+  "access_feedback_only",
   "section_break_login_restrictions",
   "login_after",
   "login_before",
@@ -97,13 +100,35 @@
   {
    "fieldname": "column_break_sxnk",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "service_number",
+   "fieldtype": "Link",
+   "label": "Service Number",
+   "options": "Personnel",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fetch_from": "service_number.personnel_name",
+   "fieldname": "personnel_name",
+   "fieldtype": "Data",
+   "label": "Personnel Name",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "access_feedback_only",
+   "fieldtype": "Check",
+   "label": "Access Feedback Only"
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-10 18:50:10.700587",
+ "modified": "2026-04-03 15:32:08.325129",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Create Operator",

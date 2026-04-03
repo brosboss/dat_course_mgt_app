@@ -586,93 +586,6 @@ def create_mission_roles():
 
 
 @frappe.whitelist()
-def create_course_nomination_roles():
-	"""Create roles for Course Nomination DocType permissions."""
-
-	roles_to_create = [
-		{
-			"role_name": "Can Create Course Nomination",
-			"desk_access": 1,
-			"is_custom": 1,
-		},
-		{
-			"role_name": "Can Read Course Nomination",
-			"desk_access": 1,
-			"is_custom": 1,
-		},
-		{
-			"role_name": "Can Delete Course Nomination",
-			"desk_access": 1,
-			"is_custom": 1,
-		},
-		{
-			"role_name": "Can Cancel Course Nomination",
-			"desk_access": 1,
-			"is_custom": 1,
-		},
-		{
-			"role_name": "Can Submit Course Nomination",
-			"desk_access": 1,
-			"is_custom": 1,
-		},
-		{
-			"role_name": "Can Amend Course Nomination",
-			"desk_access": 1,
-			"is_custom": 1,
-		},
-	]
-
-	created_roles = []
-	existing_roles = []
-
-	for role_data in roles_to_create:
-		role_name = role_data["role_name"]
-
-		if frappe.db.exists("Role", role_name):
-			existing_roles.append(role_name)
-			frappe.logger().info(f"Role '{role_name}' already exists. Skipping creation.")
-			continue
-
-		try:
-			role = frappe.new_doc("Role")
-			role.role_name = role_name
-			role.desk_access = role_data.get("desk_access", 1)
-			role.is_custom = role_data.get("is_custom", 1)
-			role.flags.ignore_permissions = True
-			role.flags.ignore_mandatory = True
-			role.insert()
-
-			created_roles.append(role_name)
-			frappe.logger().info(f"Created role: {role_name}")
-
-		except Exception as e:
-			frappe.logger().error(f"Error creating role '{role_name}': {str(e)}")
-			frappe.throw(f"Failed to create role '{role_name}': {str(e)}")
-
-	frappe.db.commit()
-
-	if created_roles:
-		print(f"\n✓ Successfully created {len(created_roles)} Course Nomination role(s):")
-		for role in created_roles:
-			print(f"  - {role}")
-
-	if existing_roles:
-		print(f"\n⚠ {len(existing_roles)} Course Nomination role(s) already exist:")
-		for role in existing_roles:
-			print(f"  - {role}")
-
-	if not created_roles and not existing_roles:
-		print("\nNo Course Nomination roles were created.")
-
-	print("\n✓ Course Nomination roles setup complete!")
-
-	return {
-		"created": created_roles,
-		"existing": existing_roles,
-	}
-
-
-@frappe.whitelist()
 def create_reference_data_roles():
 	"""Create general roles for reference/master data doctypes (State, Unit, Rank, Commander Appointment, Type of Commission, Course, Appointment, Course Name)"""
 	
@@ -892,15 +805,7 @@ def add_all_roles_to_app_role_list():
 			"Mission Editor",
 			"Mission Deleter",
 			"Mission Submitter"
-		],
-		"Course Nomination": [
-			"Can Create Course Nomination",
-			"Can Read Course Nomination",
-			"Can Delete Course Nomination",
-			"Can Cancel Course Nomination",
-			"Can Submit Course Nomination",
-			"Can Amend Course Nomination",
-		],
+		]
 	}
 	
 	all_created = []
@@ -990,7 +895,7 @@ def add_all_roles_to_app_role_list():
 
 @frappe.whitelist()
 def create_all_roles():
-	"""Create all granular roles for Personnel, Course Attended, Posting Authority, Part 2 Order, Promotion, Mission, Course Nomination, and Reference Data doctypes"""
+	"""Create all granular roles for Personnel, Course Attended, Posting Authority, Part 2 Order, Promotion, Mission, and Reference Data doctypes"""
 	
 	personnel_result = create_personnel_roles()
 	course_attended_result = create_course_attended_roles()
@@ -998,7 +903,6 @@ def create_all_roles():
 	part_2_order_result = create_part_2_order_roles()
 	promotion_result = create_promotion_roles()
 	mission_result = create_mission_roles()
-	course_nomination_result = create_course_nomination_roles()
 	reference_data_result = create_reference_data_roles()
 	
 	# Add all roles to App Role List
@@ -1012,7 +916,6 @@ def create_all_roles():
 		"part_2_order": part_2_order_result,
 		"promotion": promotion_result,
 		"mission": mission_result,
-		"course_nomination": course_nomination_result,
 		"reference_data": reference_data_result,
 		"app_role_list": app_role_list_result,
 		"reference_data_app_role_list": reference_data_app_role_list_result

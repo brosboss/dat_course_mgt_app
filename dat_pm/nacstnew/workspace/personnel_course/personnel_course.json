@@ -1,0 +1,33 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"dtOvHOzgMU\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Personnel Course</span>\",\"col\":12}}]",
+ "creation": "2026-04-02 11:50:55.929089",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "hr",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Personnel Course",
+ "links": [],
+ "modified": "2026-04-03 15:53:03.740090",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Personnel Course",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "Can View Dashboard"
+  }
+ ],
+ "sequence_id": 5.0,
+ "shortcuts": [],
+ "title": "Personnel Course"
+}

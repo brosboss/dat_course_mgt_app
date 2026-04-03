@@ -6,13 +6,35 @@ from frappe import _
 from frappe.utils import get_datetime
 from datetime import datetime, timedelta
 
+RTAL_ROLE = "Can View Real-Time Audit Log"
+
+
+def _assert_rtal_access():
+	"""Match Page roles (rtal.json): Administrator, System Manager, RTAL role.
+
+	RTAL handlers read Version / DocType / Module Def for aggregation; those DocTypes
+	often have no role permission for audit viewers, so listing uses ignore_permissions
+	while row-level exposure still uses has_permission on reference DocTypes.
+	"""
+	if frappe.session.user == "Guest":
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	if frappe.session.user == "Administrator":
+		return
+	roles = frappe.get_roles(frappe.session.user)
+	if RTAL_ROLE in roles or "System Manager" in roles:
+		return
+	frappe.throw(_("Not permitted"), frappe.PermissionError)
+
 
 @frappe.whitelist()
 def get_accessible_modules():
 	"""Get list of modules the current user has access to based on module profile"""
+	_assert_rtal_access()
 	if frappe.session.user == "Administrator":
 		# Administrator can see all modules
-		all_modules = frappe.get_all("Module Def", fields=["name"], order_by="name asc", pluck="name")
+		all_modules = frappe.get_all(
+			"Module Def", fields=["name"], order_by="name asc", pluck="name", ignore_permissions=True
+		)
 		return all_modules
 	
 	# Check if user has a module profile assigned
@@ -27,7 +49,9 @@ def get_accessible_modules():
 	blocked_modules = user_doc.get_blocked_modules()
 	
 	# Get all modules
-	all_modules = frappe.get_all("Module Def", fields=["name"], order_by="name asc", pluck="name")
+	all_modules = frappe.get_all(
+		"Module Def", fields=["name"], order_by="name asc", pluck="name", ignore_permissions=True
+	)
 	
 	# Calculate allowed modules: all modules minus blocked modules
 	allowed_modules = [m for m in all_modules if m not in blocked_modules]
@@ -46,7 +70,8 @@ def get_accessible_modules():
 			"DocType",
 			filters={"module": module_name, "istable": 0, "issingle": 0},
 			fields=["name"],
-			pluck="name"
+			pluck="name",
+			ignore_permissions=True,
 		)
 		
 		# Check if user can read any doctype in this module
@@ -69,6 +94,7 @@ def get_accessible_modules():
 @frappe.whitelist()
 def get_accessible_doctypes(module=None):
 	"""Get list of doctypes the current user has access to, optionally filtered by module"""
+	_assert_rtal_access()
 	if frappe.session.user == "Administrator":
 		# Administrator can see all doctypes
 		filters = {
@@ -82,7 +108,8 @@ def get_accessible_doctypes(module=None):
 			"DocType",
 			filters=filters,
 			fields=["name"],
-			pluck="name"
+			pluck="name",
+			ignore_permissions=True,
 		)
 		return all_doctypes
 	
@@ -98,7 +125,9 @@ def get_accessible_doctypes(module=None):
 	blocked_modules = user_doc.get_blocked_modules()
 	
 	# Get all modules
-	all_modules = frappe.get_all("Module Def", fields=["name"], order_by="name asc", pluck="name")
+	all_modules = frappe.get_all(
+		"Module Def", fields=["name"], order_by="name asc", pluck="name", ignore_permissions=True
+	)
 	
 	# Calculate allowed modules: all modules minus blocked modules
 	allowed_modules = [m for m in all_modules if m not in blocked_modules]
@@ -128,7 +157,8 @@ def get_accessible_doctypes(module=None):
 		"DocType",
 		filters=filters,
 		fields=["name"],
-		pluck="name"
+		pluck="name",
+		ignore_permissions=True,
 	)
 	
 	# Check permission for each doctype
@@ -147,6 +177,7 @@ def get_accessible_doctypes(module=None):
 @frappe.whitelist()
 def get_realtime_activities(limit=50, since=None, doctype=None, module=None, from_date=None, to_date=None):
 	"""Get all recent activities across all doctypes for real-time monitoring"""
+	_assert_rtal_access()
 	
 	# Convert limit to integer (reduced default from 100 to 50 for better performance)
 	try:
@@ -171,7 +202,9 @@ def get_realtime_activities(limit=50, since=None, doctype=None, module=None, fro
 		blocked_modules = user_doc.get_blocked_modules()
 		
 		# Get all modules
-		all_modules = frappe.get_all("Module Def", fields=["name"], order_by="name asc", pluck="name")
+		all_modules = frappe.get_all(
+			"Module Def", fields=["name"], order_by="name asc", pluck="name", ignore_permissions=True
+		)
 		
 		# Calculate allowed modules: all modules minus blocked modules
 		allowed_modules = [m for m in all_modules if m not in blocked_modules]
@@ -226,12 +259,6 @@ def get_realtime_activities(limit=50, since=None, doctype=None, module=None, fro
 	if doctype:
 		filters["ref_doctype"] = doctype
 	
-	# For non-admin users, get allowed modules for validation
-	allowed_modules = []
-	if not is_admin:
-		user = frappe.get_user()
-		allowed_modules = user.allow_modules or []
-	
 	# Filter by module if provided (only if doctype is not specified)
 	doctype_list = None
 	if module and not doctype:
@@ -245,7 +272,8 @@ def get_realtime_activities(limit=50, since=None, doctype=None, module=None, fro
 			"DocType",
 			filters={"module": module, "istable": 0, "issingle": 0},
 			fields=["name"],
-			pluck="name"
+			pluck="name",
+			ignore_permissions=True,
 		)
 		if doctypes_in_module:
 			# Filter by user permissions
@@ -314,7 +342,8 @@ def get_realtime_activities(limit=50, since=None, doctype=None, module=None, fro
 			"data"
 		],
 		order_by="creation desc",
-		limit=limit
+		limit=limit,
+		ignore_permissions=True,
 	)
 	
 	# Filter versions by permissions if not admin and no specific filter
@@ -500,7 +529,8 @@ def get_realtime_activities(limit=50, since=None, doctype=None, module=None, fro
 				"DocType",
 				filters={"module": ["in", allowed_modules], "istable": 0, "issingle": 0},
 				fields=["name"],
-				pluck="name"
+				pluck="name",
+				ignore_permissions=True,
 			)
 		else:
 			all_doctypes = []

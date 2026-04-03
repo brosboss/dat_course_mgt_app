@@ -1,0 +1,33 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"_CPSnxEZhb\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Training Dashboard</span>\",\"col\":12}}]",
+ "creation": "2026-04-02 13:00:39.475668",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "color-energy-points",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Training Dashboard",
+ "links": [],
+ "modified": "2026-04-03 15:54:37.992928",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Training Dashboard",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "Can View Dashboard"
+  }
+ ],
+ "sequence_id": 2.0,
+ "shortcuts": [],
+ "title": "Training Dashboard"
+}

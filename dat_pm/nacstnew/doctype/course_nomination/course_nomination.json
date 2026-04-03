@@ -1,11 +1,13 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:{course_name}.{course_suffix}",
  "creation": "2026-03-10 22:06:15.683715",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "course_name",
+  "course_suffix",
   "organising_body",
   "column_break_g5erd",
   "course_category",
@@ -18,10 +20,12 @@
   "end_date",
   "section_break_qmme",
   "course_fee",
-  "course_allowances",
   "column_break_e29do",
   "currency",
+  "column_break_mapz",
   "funding_source",
+  "column_break_byom",
+  "course_allowances",
   "section_break_pmhb",
   "personnel_due_for_course",
   "section_break_zpzr1",
@@ -53,11 +57,11 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "nominated_personnel",
    "fieldtype": "Table",
    "label": "Nominated Personnel",
-   "options": "Nominated Personnel",
-   "reqd": 1
+   "options": "Nominated Personnel"
   },
   {
    "fieldname": "organising_body",
@@ -147,6 +151,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "course_materials",
    "fieldtype": "Table",
    "label": "Course Materials",
@@ -160,16 +165,32 @@
    "options": "Course Nomination",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "course_suffix",
+   "fieldtype": "Data",
+   "label": "Course Suffix",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_mapz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_byom",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
+ "is_calendar_and_gantt": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-31 20:10:41.646916",
+ "modified": "2026-04-03 12:03:07.671037",
  "modified_by": "Administrator",
- "module": "nacstnew",
+ "module": "Nacstnew",
  "name": "Course Nomination",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -244,6 +265,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

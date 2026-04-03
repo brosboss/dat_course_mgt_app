@@ -37,10 +37,13 @@ class CreateOperator(Document):
 		if frappe.utils.cint(self.enabled) == 0 and self.email == "Administrator":
 			frappe.throw(_("Administrator user cannot be disabled"), title=_("Invalid Operation"))
 		
-		# Ensure "Can View Dashboard" role is always assigned
-		self._ensure_can_view_dashboard_role()
-		# Ensure "Personnel Reader" role is always assigned
-		self._ensure_personnel_reader_role()
+		if frappe.utils.cint(getattr(self, "access_feedback_only", 0)):
+			self._apply_feedback_only_roles()
+		else:
+			# Ensure "Can View Dashboard" role is always assigned
+			self._ensure_can_view_dashboard_role()
+			# Ensure "Personnel Reader" role is always assigned
+			self._ensure_personnel_reader_role()
 	
 	def after_insert(self):
 		"""Create user after document is inserted"""
@@ -85,24 +88,20 @@ class CreateOperator(Document):
 				# Ignore password policy if needed (optional, remove if you want to enforce policy)
 				user.flags.ignore_password_policy = True
 			
-			# Insert user
-			user.insert(ignore_permissions=True)
-			
-			# Add roles from app_roles_assigned_list
+			# Resolve roles before insert so User.validate (check_roles_added) sees them and
+			# does not show "Newly created user has no roles enabled."
 			roles_to_add = []
 			if self.app_roles_assigned_list:
 				for role_row in self.app_roles_assigned_list:
 					if role_row.app_role:
-						# Get the actual role name from App Role List
-						# role_row.app_role is the name of App Role List document
-						# We need to get the app_role field from that document which links to Role
 						role_name = frappe.db.get_value("App Role List", role_row.app_role, "app_role")
 						if role_name:
 							roles_to_add.append(role_name)
-			
-			# Add roles to user
 			if roles_to_add:
-				user.add_roles(*roles_to_add)
+				user.append_roles(*roles_to_add)
+			
+			# Insert user (persists roles set above)
+			user.insert(ignore_permissions=True)
 			
 			# Ensure module profile is "No Module" - set on document and save to trigger block_modules update
 			user.module_profile = "No Module"
@@ -269,3 +268,21 @@ class CreateOperator(Document):
 		if not has_personnel_reader:
 			child_row = self.append("app_roles_assigned_list")
 			child_row.app_role = personnel_reader_app_role
+
+	def _apply_feedback_only_roles(self):
+		"""Restrict roles to 'Can Only Access Feedback' when access_feedback_only is set."""
+		feedback_app_role = frappe.db.get_value(
+			"App Role List",
+			{"app_role": "Can Only Access Feedback"},
+			"name",
+		)
+		if not feedback_app_role:
+			frappe.throw(
+				_(
+					"'Can Only Access Feedback' role must exist in App Role List. Please create it first."
+				),
+				title=_("Missing Role"),
+			)
+		self.app_roles_assigned_list = []
+		row = self.append("app_roles_assigned_list")
+		row.app_role = feedback_app_role

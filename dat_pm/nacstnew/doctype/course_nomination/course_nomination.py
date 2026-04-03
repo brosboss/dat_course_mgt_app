@@ -3,7 +3,18 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import getdate, today
+from frappe.utils import get_table_name, getdate, today
+
+
+def _docstatus_label(ds):
+	ds = int(ds) if ds is not None else 0
+	if ds == 0:
+		return frappe._("Draft")
+	if ds == 1:
+		return frappe._("Submitted")
+	if ds == 2:
+		return frappe._("Cancelled")
+	return str(ds)
 
 def _get_qualified_service_numbers_for_course(course_name):
 	"""Return set of service_numbers that are qualified for the course (rank, not taken, prereqs done)."""
@@ -161,6 +172,71 @@ def get_personnel_due_for_course(course_name):
 
 
 @frappe.whitelist()
+def get_other_nomination_rows_for_same_course(course_name, exclude_nomination_name=None):
+	"""
+	For the same course, find service numbers that already appear on another Course Nomination
+	(including draft, submitted, or cancelled). Excludes the parent named exclude_nomination_name
+	so the current document does not flag its own rows.
+
+	Returns: { "SERVICE_NO": [ {"nomination": "...", "docstatus": 0|1|2, "status_label": "..."}, ... ], ... }
+	"""
+	if not course_name or not frappe.db.exists("Course Name", course_name):
+		return {}
+
+	exclude = (exclude_nomination_name or "").strip() or None
+
+	pt = get_table_name("Course Nomination", wrap_in_backticks=True)
+	ct = get_table_name("Nominated Personnel", wrap_in_backticks=True)
+
+	clauses = [
+		"np.parenttype = %(parenttype)s",
+		"np.parentfield = %(parentfield)s",
+		"cn.course_name = %(course)s",
+		"IFNULL(np.service_number, '') != ''",
+	]
+	params = {
+		"parenttype": "Course Nomination",
+		"parentfield": "nominated_personnel",
+		"course": course_name,
+	}
+	if exclude:
+		clauses.append("cn.name != %(exclude)s")
+		params["exclude"] = exclude
+
+	where_sql = " AND ".join(clauses)
+
+	rows = frappe.db.sql(
+		f"""
+		SELECT np.service_number AS service_number,
+			cn.name AS nomination,
+			IFNULL(cn.docstatus, 0) AS docstatus
+		FROM {ct} AS np
+		INNER JOIN {pt} AS cn ON cn.name = np.parent
+		WHERE {where_sql}
+		ORDER BY cn.modified DESC
+		""",
+		params,
+		as_dict=True,
+	)
+
+	out = {}
+	for r in rows:
+		sn = r.service_number
+		if not sn:
+			continue
+		ds = int(r.docstatus or 0)
+		out.setdefault(sn, []).append(
+			{
+				"nomination": r.nomination,
+				"docstatus": ds,
+				"status_label": str(_docstatus_label(ds)),
+			}
+		)
+
+	return out
+
+
+@frappe.whitelist()
 def get_courses_attended_for_personnel(service_number):
 	"""Return list of courses the personnel has attended (submitted Course Attended)."""
 	if not service_number:
@@ -193,17 +269,49 @@ def get_courses_eligible_for_personnel(service_number):
 
 
 @frappe.whitelist()
-def create_course_nomination_from_page(course_name, nominated_personnel):
+def create_course_nomination_from_page(
+	course_name,
+	nominated_personnel,
+	organising_body=None,
+	start_date=None,
+	end_date=None,
+	course_suffix=None,
+):
 	"""
 	Create a Course Nomination doc from the nomination page.
 	nominated_personnel: list of dicts with service_number, personnel_name, current_rank, current_unit.
-	Validates (only qualified personnel allowed); returns the new doc name.
+	organising_body, start_date, end_date, course_suffix: same required fields as the Course Nomination doctype.
+	Document name is built from format:{course_name}.{course_suffix}.
+	Returns the new doc name.
 	"""
 	if not course_name:
 		frappe.throw(frappe._("Course Name is required."))
+	if not course_suffix or not str(course_suffix).strip():
+		frappe.throw(frappe._("Course Suffix is required (used in the document name with the course)."))
+	if not organising_body or not str(organising_body).strip():
+		frappe.throw(frappe._("Organising Body is required."))
+	if not start_date:
+		frappe.throw(frappe._("Start Date is required."))
+	if not end_date:
+		frappe.throw(frappe._("End Date is required."))
+	try:
+		sd = getdate(start_date)
+		ed = getdate(end_date)
+	except Exception:
+		frappe.throw(frappe._("Start Date and End Date must be valid dates."))
+	if ed < sd:
+		frappe.throw(frappe._("End Date cannot be before Start Date."))
+
 	nominated = frappe.parse_json(nominated_personnel) if isinstance(nominated_personnel, str) else (nominated_personnel or [])
+	if not nominated:
+		frappe.throw(frappe._("Add at least one nominated personnel."))
+
 	doc = frappe.new_doc("Course Nomination")
 	doc.course_name = course_name
+	doc.course_suffix = str(course_suffix).strip()
+	doc.organising_body = str(organising_body).strip()
+	doc.start_date = sd
+	doc.end_date = ed
 	for p in nominated:
 		if not p.get("service_number"):
 			continue
@@ -213,8 +321,112 @@ def create_course_nomination_from_page(course_name, nominated_personnel):
 			"rank": p.get("current_rank") or p.get("rank"),
 			"unit": p.get("current_unit") or p.get("unit"),
 		})
+	if not doc.nominated_personnel:
+		frappe.throw(frappe._("Add at least one nominated personnel with a service number."))
 	doc.flags.ignore_permissions = False
 	doc.insert()
+	return doc.name
+
+
+@frappe.whitelist()
+def get_course_nomination_for_page(name):
+	"""Load a Course Nomination for the nomination page (edit mode)."""
+	if not name or not frappe.db.exists("Course Nomination", name):
+		frappe.throw(frappe._("Course Nomination not found."))
+	doc = frappe.get_doc("Course Nomination", name)
+	rows = []
+	for row in doc.nominated_personnel or []:
+		if not row.service_number:
+			continue
+		rows.append(
+			{
+				"service_number": row.service_number,
+				"personnel_name": row.personnel_name or "",
+				"current_rank": row.rank or "",
+				"current_unit": row.unit or "",
+				"remarks": row.remarks or "",
+			}
+		)
+	course_ended = False
+	if doc.end_date:
+		course_ended = getdate(doc.end_date) < getdate(today())
+
+	return {
+		"name": doc.name,
+		"course_name": doc.course_name,
+		"course_suffix": doc.course_suffix,
+		"organising_body": doc.organising_body,
+		"start_date": doc.start_date,
+		"end_date": doc.end_date,
+		"docstatus": doc.docstatus,
+		"course_ended": course_ended,
+		"nominated_personnel": rows,
+	}
+
+
+@frappe.whitelist()
+def update_course_nomination_from_page(
+	nomination_name,
+	nominated_personnel,
+	organising_body=None,
+	start_date=None,
+	end_date=None,
+):
+	"""
+	Update a Course Nomination from the page.
+
+	- **Draft**: replace nominated personnel + update organising body and dates.
+	- **Submitted**: replace **nominated personnel** only (child table has allow_on_submit);
+	  header fields are not changed here (use the desk form if dates/body must change after submit).
+	- **Cancelled**: not allowed.
+	"""
+	if not nomination_name or not frappe.db.exists("Course Nomination", nomination_name):
+		frappe.throw(frappe._("Course Nomination not found."))
+	doc = frappe.get_doc("Course Nomination", nomination_name)
+	if doc.docstatus == 2:
+		frappe.throw(frappe._("Cancelled nominations cannot be updated from this page."))
+
+	nominated = frappe.parse_json(nominated_personnel) if isinstance(nominated_personnel, str) else (nominated_personnel or [])
+	if not nominated:
+		frappe.throw(frappe._("Add at least one nominated personnel."))
+
+	if doc.docstatus == 0:
+		if not organising_body or not str(organising_body).strip():
+			frappe.throw(frappe._("Organising Body is required."))
+		if not start_date:
+			frappe.throw(frappe._("Start Date is required."))
+		if not end_date:
+			frappe.throw(frappe._("End Date is required."))
+		try:
+			sd = getdate(start_date)
+			ed = getdate(end_date)
+		except Exception:
+			frappe.throw(frappe._("Start Date and End Date must be valid dates."))
+		if ed < sd:
+			frappe.throw(frappe._("End Date cannot be before Start Date."))
+		doc.organising_body = str(organising_body).strip()
+		doc.start_date = sd
+		doc.end_date = ed
+
+	for row in list(doc.nominated_personnel or []):
+		doc.remove(row)
+
+	for p in nominated:
+		if not p.get("service_number"):
+			continue
+		doc.append(
+			"nominated_personnel",
+			{
+				"service_number": p.get("service_number"),
+				"personnel_name": p.get("personnel_name") or "",
+				"rank": p.get("current_rank") or p.get("rank"),
+				"unit": p.get("current_unit") or p.get("unit"),
+			},
+		)
+	if not doc.nominated_personnel:
+		frappe.throw(frappe._("Add at least one nominated personnel with a service number."))
+	doc.flags.ignore_permissions = False
+	doc.save()
 	return doc.name
 
 
@@ -443,13 +655,41 @@ def update_course_attended_status_from_cron():
 
 
 class CourseNomination(Document):
+	def _nominated_row_needs_live_qualification_check(self, row, prev_by_name, course_changed):
+		"""
+		Only new child rows or rows whose service number changed need a live eligibility check.
+		Existing saved rows keep their nomination as-is (rank / Course Attended may have changed since).
+		If the header course changed, all rows are checked again.
+		"""
+		if course_changed:
+			return True
+		if not row.name or str(row.name).startswith("new-"):
+			return True
+		prev = prev_by_name.get(row.name) if prev_by_name else None
+		if not prev:
+			return True
+		if (prev.service_number or "") != (row.service_number or ""):
+			return True
+		return False
+
 	def validate(self):
 		if not self.course_name or not self.nominated_personnel:
 			return
 		qualified = _get_qualified_service_numbers_for_course(self.course_name)
+		prev = self.get_doc_before_save()
+		course_changed = not prev or (prev.course_name or "") != (self.course_name or "")
+		prev_by_name = {}
+		if prev:
+			for pr in prev.nominated_personnel or []:
+				if getattr(pr, "name", None):
+					prev_by_name[pr.name] = pr
 		not_qualified = []
 		for row in self.nominated_personnel:
-			if row.service_number and row.service_number not in qualified:
+			if not row.service_number:
+				continue
+			if not self._nominated_row_needs_live_qualification_check(row, prev_by_name, course_changed):
+				continue
+			if row.service_number not in qualified:
 				not_qualified.append(row.service_number or row.personnel_name or "Unknown")
 		if not_qualified:
 			frappe.throw(

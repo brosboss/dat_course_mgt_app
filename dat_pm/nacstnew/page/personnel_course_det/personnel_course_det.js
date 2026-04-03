@@ -88,19 +88,14 @@ frappe.pages["personnel-course-det"].on_page_load = function (wrapper) {
 				border-bottom: 1px solid #f1f5f9;
 			}
 			.pcd-table tbody tr:hover { background: #f8fafc; }
-			.pcd-select-wrap { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-			.pcd-select {
+			.pcd-select-wrap { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+			.pcd-personnel-link-wrap {
+				flex: 1;
 				min-width: 280px;
-				padding: 8px 12px;
-				border-radius: 8px;
-				border: 1px solid #cbd5e1;
-				font-size: 13px;
+				max-width: 520px;
 			}
-			.pcd-select:focus {
-				outline: none;
-				border-color: #3b82f6;
-				box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-			}
+			.pcd-personnel-link-wrap .frappe-control { margin-bottom: 0; }
+			.pcd-personnel-link-wrap .control-input-wrapper { width: 100%; }
 			.pcd-link {
 				color: #2563eb;
 				text-decoration: none;
@@ -120,12 +115,10 @@ frappe.pages["personnel-course-det"].on_page_load = function (wrapper) {
 				</div>
 				<div class="pcd-card-body">
 					<div class="pcd-select-wrap">
-						<select class="pcd-select" id="pcd-personnel-select">
-							<option value="">— Select personnel —</option>
-						</select>
-						<button type="button" class="btn btn-default btn-sm" id="pcd-clear">Clear</button>
+						<div class="pcd-personnel-link-wrap" id="pcd-personnel-link-wrap"></div>
+						<button type="button" class="btn btn-default btn-sm" id="pcd-clear" style="margin-top: 4px;">Clear</button>
 					</div>
-					<p class="text-muted" style="margin: 12px 0 0 0; font-size: 12px;">View courses this personnel has attended and courses they are eligible for (by rank, not yet taken, prerequisites completed).</p>
+					<p class="text-muted" style="margin: 12px 0 0 0; font-size: 12px;">Type to search personnel by name or service number (results load as you type). Then view courses attended and eligible courses (by rank, not yet taken, prerequisites completed).</p>
 				</div>
 			</div>
 
@@ -180,35 +173,20 @@ frappe.pages["personnel-course-det"].on_page_load = function (wrapper) {
 		return d.innerHTML;
 	}
 
-	function load_personnel_list() {
-		frappe.call({
-			method: "frappe.client.get_list",
-			args: {
-				doctype: "Personnel",
-				fields: ["service_number", "personnel_name"],
-				limit_page_length: 500,
-				order_by: "personnel_name asc",
-			},
-			callback: function (r) {
-				var select = document.getElementById("pcd-personnel-select");
-				if (!select || !r.message) return;
-				select.innerHTML = '<option value="">— Select personnel —</option>';
-				(r.message || []).forEach(function (row) {
-					var opt = document.createElement("option");
-					opt.value = row.service_number || row.name || "";
-					opt.textContent = (row.personnel_name || row.service_number || opt.value) + " (" + (row.service_number || "") + ")";
-					opt.setAttribute("data-name", row.personnel_name || "");
-					select.appendChild(opt);
-				});
-			},
-		});
+	function get_personnel_link_value() {
+		var c = wrapper.pcd_personnel_control;
+		return c && typeof c.get_value === "function" ? (c.get_value() || "") : "";
 	}
 
 	function on_personnel_change() {
-		var select = document.getElementById("pcd-personnel-select");
-		var val = select ? select.value : "";
+		var val = get_personnel_link_value();
 		state.service_number = val || null;
-		state.personnel_name = (select && select.selectedIndex >= 0 && select.options[select.selectedIndex]) ? select.options[select.selectedIndex].getAttribute("data-name") || "" : null;
+		state.personnel_name = null;
+		if (val) {
+			frappe.db.get_value("Personnel", val, "personnel_name", function (message) {
+				if (message && message.personnel_name) state.personnel_name = message.personnel_name;
+			});
+		}
 		state.courses_attended = [];
 		state.courses_eligible = [];
 
@@ -322,11 +300,29 @@ frappe.pages["personnel-course-det"].on_page_load = function (wrapper) {
 		);
 	}
 
-	document.getElementById("pcd-personnel-select").addEventListener("change", on_personnel_change);
+	wrapper.pcd_personnel_control = frappe.ui.form.make_control({
+		df: {
+			fieldtype: "Link",
+			options: "Personnel",
+			fieldname: "personnel",
+			label: "",
+			placeholder: __("Search name or service number…"),
+			reqd: 0,
+			change: function () {
+				on_personnel_change();
+			},
+		},
+		parent: page.main.find("#pcd-personnel-link-wrap"),
+		render_input: true,
+	});
+	wrapper.pcd_personnel_control.toggle_label(false);
+	wrapper.pcd_personnel_control.toggle_description(false);
+	wrapper.pcd_personnel_control.refresh();
+
 	document.getElementById("pcd-clear").addEventListener("click", function () {
-		document.getElementById("pcd-personnel-select").value = "";
+		if (wrapper.pcd_personnel_control && wrapper.pcd_personnel_control.set_value) {
+			wrapper.pcd_personnel_control.set_value("");
+		}
 		on_personnel_change();
 	});
-
-	load_personnel_list();
 };

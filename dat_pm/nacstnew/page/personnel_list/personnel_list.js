@@ -415,6 +415,9 @@ function build_personnel_list_page(page) {
 				outline: none;
 				border-color: #667eea;
 			}
+			.pl-filter-link-wrap { width: 100%; min-width: 0; }
+			.pl-filter-link-wrap .frappe-control { margin-bottom: 0; }
+			.pl-filter-link-wrap .control-input-wrapper { width: 100%; }
 			
 			.pl-period-range-section {
 				background: #f8f9fa;
@@ -671,15 +674,11 @@ function build_personnel_list_page(page) {
 					</div>
 					<div class="pl-filter-group">
 						<label class="pl-filter-label">Current Unit</label>
-						<select id="filter_current_unit" class="pl-filter-select">
-							<option value="">All Units</option>
-						</select>
+						<div id="pl-filter-current-unit-wrap" class="pl-filter-link-wrap"></div>
 					</div>
 					<div class="pl-filter-group">
 						<label class="pl-filter-label">Rank</label>
-						<select id="filter_rank" class="pl-filter-select">
-							<option value="">All Ranks</option>
-						</select>
+						<div id="pl-filter-rank-wrap" class="pl-filter-link-wrap"></div>
 					</div>
 					<div class="pl-filter-group">
 						<label class="pl-filter-label">Date TOS</label>
@@ -788,24 +787,16 @@ function build_personnel_list_page(page) {
 	let selectedPeriodRanges = []; // Array of range IDs that are selected
 	let periodRanges = []; // Array of {id, min, max, color}
 	let editingRangeId = null;
-	
-	// Load period ranges from localStorage
-	loadPeriodRanges();
-	
-	// Load filter options
-	loadFilterOptions();
-	
-	// Define loadPersonnelList function before calling it
-	window.loadPersonnelList = function(page) {
+
+	window.loadPersonnelList = function (pageNum) {
 		$('#loading_state').show();
 		$('#table_container').hide();
 		$('#empty_state').hide();
 		$('#pagination_container').hide();
-		
 		frappe.call({
 			method: `dat_pm.nacstnew.doctype.personnel.personnel.get_personnel_list`,
 			args: {
-				page: page,
+				page: pageNum,
 				page_length: window.pageLength,
 				category: window.currentFilters.category || null,
 				current_unit: window.currentFilters.current_unit || null,
@@ -813,15 +804,15 @@ function build_personnel_list_page(page) {
 				date_tos: window.currentFilters.date_tos || null,
 				personnel_name: window.currentFilters.personnel_name || null
 			},
-			callback: function(r) {
+			callback: function (r) {
 				$('#loading_state').hide();
-				
+
 				if (r.message && r.message.data) {
 					let data = r.message.data;
 					window.totalCount = r.message.total_count;
 					window.totalPages = r.message.total_pages;
 					window.currentPage = r.message.page;
-					
+
 					if (data.length > 0) {
 						displayPersonnelTable(data);
 						updatePagination();
@@ -834,7 +825,7 @@ function build_personnel_list_page(page) {
 					$('#empty_state').show();
 				}
 			},
-			error: function(r) {
+			error: function (r) {
 				$('#loading_state').hide();
 				$('#empty_state').show();
 				frappe.msgprint({
@@ -846,6 +837,12 @@ function build_personnel_list_page(page) {
 			}
 		});
 	};
+	
+	// Load period ranges from localStorage
+	loadPeriodRanges();
+	
+	// Load filter options
+	loadFilterOptions();
 	
 	// Load initial data
 	window.loadPersonnelList(window.currentPage);
@@ -874,43 +871,45 @@ function build_personnel_list_page(page) {
 	};
 	
 	function loadFilterOptions() {
-		// Load units
-		frappe.call({
-			method: `dat_pm.nacstnew.doctype.personnel.personnel.get_distinct_units`,
-			callback: function(r) {
-				if (r.message) {
-					let select = $('#filter_current_unit');
-					r.message.forEach(function(unit) {
-						let option = $('<option></option>')
-							.attr('value', unit)
-							.text(unit);
-						select.append(option);
-					});
-				}
-			}
+		page.pl_unit_control = frappe.ui.form.make_control({
+			df: {
+				fieldtype: "Link",
+				options: "Unit",
+				fieldname: "filter_current_unit",
+				label: "",
+				placeholder: __("Search unit…"),
+				reqd: 0,
+			},
+			parent: page.main.find("#pl-filter-current-unit-wrap"),
+			render_input: true,
 		});
-		
-		// Load ranks
-		frappe.call({
-			method: `dat_pm.nacstnew.doctype.personnel.personnel.get_distinct_ranks`,
-			callback: function(r) {
-				if (r.message) {
-					let select = $('#filter_rank');
-					r.message.forEach(function(rank) {
-						let option = $('<option></option>')
-							.attr('value', rank)
-							.text(rank);
-						select.append(option);
-					});
-				}
-			}
+		page.pl_unit_control.toggle_label(false);
+		page.pl_unit_control.toggle_description(false);
+		page.pl_unit_control.refresh();
+
+		page.pl_rank_control = frappe.ui.form.make_control({
+			df: {
+				fieldtype: "Link",
+				options: "Rank",
+				fieldname: "filter_rank",
+				label: "",
+				placeholder: __("Search rank…"),
+				reqd: 0,
+			},
+			parent: page.main.find("#pl-filter-rank-wrap"),
+			render_input: true,
 		});
+		page.pl_rank_control.toggle_label(false);
+		page.pl_rank_control.toggle_description(false);
+		page.pl_rank_control.refresh();
 	}
 	
 	window.applyFilters = function() {
 		window.currentFilters.category = $('#filter_category').val() || '';
-		window.currentFilters.current_unit = $('#filter_current_unit').val() || '';
-		window.currentFilters.rank = $('#filter_rank').val() || '';
+		window.currentFilters.current_unit =
+			(page.pl_unit_control && page.pl_unit_control.get_value && page.pl_unit_control.get_value()) || "";
+		window.currentFilters.rank =
+			(page.pl_rank_control && page.pl_rank_control.get_value && page.pl_rank_control.get_value()) || "";
 		window.currentFilters.date_tos = $('#filter_date_tos').val() || '';
 		window.currentFilters.personnel_name = $('#filter_personnel_name').val() || '';
 		window.currentPage = 1;
@@ -919,8 +918,12 @@ function build_personnel_list_page(page) {
 	
 	window.clearFilters = function() {
 		$('#filter_category').val('');
-		$('#filter_current_unit').val('');
-		$('#filter_rank').val('');
+		if (page.pl_unit_control && page.pl_unit_control.set_value) {
+			page.pl_unit_control.set_value("");
+		}
+		if (page.pl_rank_control && page.pl_rank_control.set_value) {
+			page.pl_rank_control.set_value("");
+		}
 		$('#filter_date_tos').val('');
 		$('#filter_personnel_name').val('');
 		window.currentFilters = {
@@ -972,57 +975,6 @@ function build_personnel_list_page(page) {
 			$('#page_number_input').val(window.currentPage);
 		}
 	};
-	
-	window.loadPersonnelList = function(page) {
-		$('#loading_state').show();
-		$('#table_container').hide();
-		$('#empty_state').hide();
-		$('#pagination_container').hide();
-		//dat_pm.nacstnew.doctype.
-		frappe.call({
-			method: `dat_pm.nacstnew.doctype.personnel.personnel.get_personnel_list`,
-			args: {
-				page: page,
-				page_length: window.pageLength,
-				category: window.currentFilters.category || null,
-				current_unit: window.currentFilters.current_unit || null,
-				rank: window.currentFilters.rank || null,
-				date_tos: window.currentFilters.date_tos || null,
-				personnel_name: window.currentFilters.personnel_name || null
-			},
-			callback: function(r) {
-				$('#loading_state').hide();
-				
-				if (r.message && r.message.data) {
-					let data = r.message.data;
-					window.totalCount = r.message.total_count;
-					window.totalPages = r.message.total_pages;
-					window.currentPage = r.message.page;
-					
-					if (data.length > 0) {
-						displayPersonnelTable(data);
-						updatePagination();
-						$('#table_container').show();
-						$('#pagination_container').show();
-					} else {
-						$('#empty_state').show();
-					}
-				} else {
-					$('#empty_state').show();
-				}
-			},
-			error: function(r) {
-				$('#loading_state').hide();
-				$('#empty_state').show();
-				frappe.msgprint({
-					title: __('Error'),
-					message: __('Failed to load personnel list. Please try again.'),
-					indicator: 'red'
-				});
-				console.error("Error loading personnel list:", r);
-			}
-		});
-	}
 	
 	function displayPersonnelTable(data) {
 		let tbody = $('#personnel_table_body');

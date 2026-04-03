@@ -67,7 +67,8 @@
   {
    "fieldname": "course_report",
    "fieldtype": "Attach",
-   "label": "Course Report"
+   "label": "Course Report",
+   "read_only": 1
   },
   {
    "fieldname": "grade",
@@ -107,13 +108,12 @@
    "fieldtype": "Section Break"
   }
  ],
- "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-31 22:09:01.985708",
+ "modified": "2026-04-03 16:57:31.535311",
  "modified_by": "Administrator",
- "module": "nacstnew",
+ "module": "Nacstnew",
  "name": "Feedback",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
@@ -129,8 +129,76 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Can Only Access Feedback",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Can Submit Feedback",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Can Delete Feedback",
+   "share": 1
+  },
+  {
+   "amend": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Can Amend Feedback",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Can Cancel Feedback",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Can Read Feedback",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Can Edit Feedback",
+   "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

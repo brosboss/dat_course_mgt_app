@@ -43,8 +43,6 @@ def install_fixtures():
 		("Units", insert_all_units),
 		("Grades", insert_grades),
 		("Module Profiles", insert_module_profiles),
-		("Dat PM Custom Roles", insert_dat_pm_custom_roles),
-		("Course Nomination Roles", insert_course_nomination_roles),
 		("App Role List", insert_app_role_list),
 		("Attachment Types", insert_attachment_types),
 	]
@@ -1017,9 +1015,6 @@ def insert_grades():
 		"A",
 		"B",
 		"C",
-		"C+",
-		"HC",
-		"C-",
 		"D",
 		"E",
 		"F",
@@ -1080,18 +1075,18 @@ def export_app_role_list_for_fixtures():
 	"""
 	app_role_list_entries = frappe.get_all(
 		"App Role List",
-		fields=["app_role", "owner_doctype", "active"],
+		fields=["app_role", "owner_doctype"],
 		order_by="app_role"
 	)
 	
 	# Format as Python list for fixtures
 	fixture_data = []
 	for entry in app_role_list_entries:
-		entry_dict = {
-			"app_role": entry.app_role,
-			"owner_doctype": entry.owner_doctype or None,
-			"active": 1 if entry.get("active") else 0,
-		}
+		entry_dict = {"app_role": entry.app_role}
+		if entry.owner_doctype:
+			entry_dict["owner_doctype"] = entry.owner_doctype
+		else:
+			entry_dict["owner_doctype"] = None
 		fixture_data.append(entry_dict)
 	
 	# Also print in Python code format for easy copy-paste
@@ -1099,9 +1094,7 @@ def export_app_role_list_for_fixtures():
 	print("app_role_entries = [")
 	for entry in fixture_data:
 		owner_doctype_str = f'"{entry["owner_doctype"]}"' if entry["owner_doctype"] else "None"
-		print(
-			f'\t{{"app_role": "{entry["app_role"]}", "owner_doctype": {owner_doctype_str}, "active": {entry["active"]}}},'
-		)
+		print(f'\t{{"app_role": "{entry["app_role"]}", "owner_doctype": {owner_doctype_str}}},')
 	print("]\n")
 	
 	return {
@@ -1384,218 +1377,76 @@ def insert_role_permissions_can_import_data():
 	}
 
 
-def insert_dat_pm_custom_roles():
-	"""
-	Create all custom Role documents used by dat_pm (aligned with datpm.cynktrontech.com).
-	Runs before Course Nomination Roles so shared roles exist; nomination step then no-ops for those.
-	"""
-	# Master list from production site — excludes standard Frappe / ERPNext system roles
-	dat_pm_role_names = [
-		"Atts and Dets  Amender",
-		"Atts and Dets Canceller",
-		"Atts and Dets Creator",
-		"Atts and Dets Deleter",
-		"Atts and Dets Editor",
-		"Atts and Dets Reader",
-		"Atts and Dets Submitter",
-		"Can Amend Course Nomination",
-		"Can Amend Feedback",
-		"Can Backup NAS",
-		"Can Cancel Course Nomination",
-		"Can Cancel Feedback",
-		"Can Create Course Nomination",
-		"Can Delete Course Nomination",
-		"Can Delete Feedback",
-		"Can Edit Feedback",
-		"Can Import Data",
-		"Can Only Access Feedback",
-		"Can Read Course Nomination",
-		"Can Read Feedback",
-		"Can Submit Course Nomination",
-		"Can Submit Feedback",
-		"Can View Dashboard",
-		"Can View Real-Time Audit Log",
-		"Course Attended Amender",
-		"Course Attended Canceller",
-		"Course Attended Creator",
-		"Course Attended Deleter",
-		"Course Attended Editor",
-		"Course Attended Reader",
-		"Course Attended Submitter",
-		"Data Viewer",
-		"Database Operator Manager",
-		"Mission Amender",
-		"Mission Canceller",
-		"Mission Creator",
-		"Mission Deleter",
-		"Mission Editor",
-		"Mission Reader",
-		"Mission Submitter",
-		"Part 2 Order Amender",
-		"Part 2 Order Canceller",
-		"Part 2 Order Creator",
-		"Part 2 Order Deleter",
-		"Part 2 Order Editor",
-		"Part 2 Order Reader",
-		"Part 2 Order Submitter",
-		"Personnel Creator",
-		"Personnel Deleter",
-		"Personnel Editor",
-		"Personnel Reader",
-		"Personnel Viewer",
-		"Posting Authority Amender",
-		"Posting Authority Canceller",
-		"Posting Authority Creator",
-		"Posting Authority Deleter",
-		"Posting Authority Editor",
-		"Posting Authority Reader",
-		"Posting Authority Submitter",
-		"Promotion Amender",
-		"Promotion Canceller",
-		"Promotion Creator",
-		"Promotion Deleter",
-		"Promotion Editor",
-		"Promotion Reader",
-		"Promotion Submitter",
-		"Reference Data Creator",
-		"Reference Data Deleter",
-		"Reference Data Editor",
-		"Reference Data Reader",
-		"Strength Returns Amender",
-		"Strength Returns Canceller",
-		"Strength Returns Creator",
-		"Strength Returns Deleter",
-		"Strength Returns Editor",
-		"Strength Returns Reader",
-		"Strength Returns Submitter",
-	]
-
-	inserted_count = 0
-	skipped_count = 0
-	error_count = 0
-	error_details = []
-
-	for role_name in dat_pm_role_names:
-		if frappe.db.exists("Role", role_name):
-			skipped_count += 1
-			continue
-		try:
-			role = frappe.new_doc("Role")
-			role.role_name = role_name
-			role.desk_access = 1
-			role.is_custom = 1
-			role.flags.ignore_permissions = True
-			role.flags.ignore_mandatory = True
-			role.insert()
-			inserted_count += 1
-		except Exception as e:
-			error_count += 1
-			error_details.append(f"{role_name}: {str(e)}")
-
-	return {
-		"inserted": inserted_count,
-		"skipped": skipped_count,
-		"errors": error_count,
-		"error_details": error_details,
-	}
-
-
-def insert_course_nomination_roles():
-	"""Create Role documents used by Course Nomination DocType permissions (if missing)."""
-	from dat_pm.nacstnew.utils.create_personnel_roles222 import create_course_nomination_roles
-
-	result = create_course_nomination_roles()
-	created = result.get("created") or []
-	existing = result.get("existing") or []
-	return {
-		"inserted": len(created),
-		"skipped": len(existing),
-		"errors": 0,
-		"error_details": [],
-	}
-
-
 def insert_app_role_list():
-	"""Insert App Role List entries for roles that exist in the system (with Active flags from production)."""
+	"""Insert App Role List entries for roles that exist in the system"""
 	
-	# Synced from datpm.cynktrontech.com — use export_app_role_list_for_fixtures() to refresh
+	# App Role List entries extracted from current instance
+	# Format: {"app_role": role_name, "owner_doctype": doctype_name}
+	# Note: owner_doctype can be None if not applicable
 	app_role_entries = [
-		{"app_role": "Atts and Dets  Amender", "owner_doctype": "Personnel Att and Dets Form", "active": 0},
-		{"app_role": "Atts and Dets Canceller", "owner_doctype": "Personnel Att and Dets Form", "active": 0},
-		{"app_role": "Atts and Dets Creator", "owner_doctype": "Personnel Att and Dets Form", "active": 0},
-		{"app_role": "Atts and Dets Deleter", "owner_doctype": "Personnel Att and Dets Form", "active": 0},
-		{"app_role": "Atts and Dets Editor", "owner_doctype": "Personnel Att and Dets Form", "active": 0},
-		{"app_role": "Atts and Dets Reader", "owner_doctype": "Personnel Att and Dets Form", "active": 0},
-		{"app_role": "Atts and Dets Submitter", "owner_doctype": "Personnel Att and Dets Form", "active": 0},
-		{"app_role": "Can Amend Course Nomination", "owner_doctype": "Course Nomination", "active": 1},
-		{"app_role": "Can Amend Feedback", "owner_doctype": "Feedback", "active": 1},
-		{"app_role": "Can Backup NAS", "owner_doctype": None, "active": 0},
-		{"app_role": "Can Cancel Course Nomination", "owner_doctype": "Course Nomination", "active": 1},
-		{"app_role": "Can Cancel Feedback", "owner_doctype": "Feedback", "active": 1},
-		{"app_role": "Can Create Course Nomination", "owner_doctype": "Course Nomination", "active": 1},
-		{"app_role": "Can Delete Course Nomination", "owner_doctype": "Course Nomination", "active": 1},
-		{"app_role": "Can Delete Feedback", "owner_doctype": "Feedback", "active": 1},
-		{"app_role": "Can Edit Feedback", "owner_doctype": "Feedback", "active": 1},
-		{"app_role": "Can Import Data", "owner_doctype": None, "active": 1},
-		{"app_role": "Can Only Access Feedback", "owner_doctype": "Feedback", "active": 1},
-		{"app_role": "Can Read Course Nomination", "owner_doctype": "Course Nomination", "active": 1},
-		{"app_role": "Can Read Feedback", "owner_doctype": "Feedback", "active": 1},
-		{"app_role": "Can Submit Course Nomination", "owner_doctype": "Course Nomination", "active": 1},
-		{"app_role": "Can Submit Feedback", "owner_doctype": "Feedback", "active": 1},
-		{"app_role": "Can View Dashboard", "owner_doctype": None, "active": 1},
-		{"app_role": "Can View Real-Time Audit Log", "owner_doctype": None, "active": 1},
-		{"app_role": "Course Attended Amender", "owner_doctype": "Course Attended", "active": 1},
-		{"app_role": "Course Attended Canceller", "owner_doctype": "Course Attended", "active": 1},
-		{"app_role": "Course Attended Creator", "owner_doctype": "Course Attended", "active": 1},
-		{"app_role": "Course Attended Deleter", "owner_doctype": "Course Attended", "active": 1},
-		{"app_role": "Course Attended Editor", "owner_doctype": "Course Attended", "active": 1},
-		{"app_role": "Course Attended Reader", "owner_doctype": "Course Attended", "active": 1},
-		{"app_role": "Course Attended Submitter", "owner_doctype": "Course Attended", "active": 1},
-		{"app_role": "Data Viewer", "owner_doctype": None, "active": 1},
-		{"app_role": "Database Operator Manager", "owner_doctype": "Create Operator", "active": 1},
-		{"app_role": "Mission Amender", "owner_doctype": "Mission", "active": 1},
-		{"app_role": "Mission Canceller", "owner_doctype": "Mission", "active": 1},
-		{"app_role": "Mission Creator", "owner_doctype": "Mission", "active": 1},
-		{"app_role": "Mission Deleter", "owner_doctype": "Mission", "active": 1},
-		{"app_role": "Mission Editor", "owner_doctype": "Mission", "active": 1},
-		{"app_role": "Mission Reader", "owner_doctype": "Mission", "active": 1},
-		{"app_role": "Mission Submitter", "owner_doctype": "Mission", "active": 1},
-		{"app_role": "Part 2 Order Amender", "owner_doctype": "Part 2 Order", "active": 0},
-		{"app_role": "Part 2 Order Canceller", "owner_doctype": "Part 2 Order", "active": 0},
-		{"app_role": "Part 2 Order Creator", "owner_doctype": "Part 2 Order", "active": 0},
-		{"app_role": "Part 2 Order Deleter", "owner_doctype": "Part 2 Order", "active": 0},
-		{"app_role": "Part 2 Order Editor", "owner_doctype": "Part 2 Order", "active": 0},
-		{"app_role": "Part 2 Order Reader", "owner_doctype": "Part 2 Order", "active": 0},
-		{"app_role": "Part 2 Order Submitter", "owner_doctype": "Part 2 Order", "active": 0},
-		{"app_role": "Personnel Creator", "owner_doctype": "Personnel", "active": 1},
-		{"app_role": "Personnel Deleter", "owner_doctype": "Personnel", "active": 1},
-		{"app_role": "Personnel Editor", "owner_doctype": "Personnel", "active": 1},
-		{"app_role": "Personnel Reader", "owner_doctype": "Personnel", "active": 1},
-		{"app_role": "Posting Authority Amender", "owner_doctype": "Posting Authority", "active": 0},
-		{"app_role": "Posting Authority Canceller", "owner_doctype": "Posting Authority", "active": 0},
-		{"app_role": "Posting Authority Creator", "owner_doctype": "Posting Authority", "active": 0},
-		{"app_role": "Posting Authority Deleter", "owner_doctype": "Posting Authority", "active": 0},
-		{"app_role": "Posting Authority Editor", "owner_doctype": "Posting Authority", "active": 0},
-		{"app_role": "Posting Authority Reader", "owner_doctype": "Posting Authority", "active": 0},
-		{"app_role": "Posting Authority Submitter", "owner_doctype": "Posting Authority", "active": 0},
-		{"app_role": "Promotion Amender", "owner_doctype": "Promotion", "active": 1},
-		{"app_role": "Promotion Canceller", "owner_doctype": "Promotion", "active": 1},
-		{"app_role": "Promotion Creator", "owner_doctype": "Promotion", "active": 1},
-		{"app_role": "Promotion Deleter", "owner_doctype": "Promotion", "active": 1},
-		{"app_role": "Promotion Editor", "owner_doctype": "Promotion", "active": 1},
-		{"app_role": "Promotion Reader", "owner_doctype": "Promotion", "active": 1},
-		{"app_role": "Promotion Submitter", "owner_doctype": "Promotion", "active": 1},
-		{"app_role": "Reference Data Creator", "owner_doctype": "Reference Data", "active": 1},
-		{"app_role": "Reference Data Deleter", "owner_doctype": "Reference Data", "active": 1},
-		{"app_role": "Reference Data Editor", "owner_doctype": "Reference Data", "active": 1},
-		{"app_role": "Reference Data Reader", "owner_doctype": "Reference Data", "active": 1},
-		{"app_role": "Strength Returns Amender", "owner_doctype": "Strength Returns", "active": 0},
-		{"app_role": "Strength Returns Canceller", "owner_doctype": "Strength Returns", "active": 0},
-		{"app_role": "Strength Returns Creator", "owner_doctype": "Strength Returns", "active": 0},
-		{"app_role": "Strength Returns Deleter", "owner_doctype": "Strength Returns", "active": 0},
-		{"app_role": "Strength Returns Editor", "owner_doctype": "Strength Returns", "active": 0},
-		{"app_role": "Strength Returns Reader", "owner_doctype": "Strength Returns", "active": 0},
-		{"app_role": "Strength Returns Submitter", "owner_doctype": "Strength Returns", "active": 0},
+		{"app_role": "Can View Dashboard", "owner_doctype": None},
+		{"app_role": "Can View Real-Time Audit Log", "owner_doctype": None},
+		{"app_role": "Course Attended Amender", "owner_doctype": "Course Attended"},
+		{"app_role": "Course Attended Canceller", "owner_doctype": "Course Attended"},
+		{"app_role": "Course Attended Creator", "owner_doctype": "Course Attended"},
+		{"app_role": "Course Attended Deleter", "owner_doctype": "Course Attended"},
+		{"app_role": "Course Attended Editor", "owner_doctype": "Course Attended"},
+		{"app_role": "Course Attended Reader", "owner_doctype": "Course Attended"},
+		{"app_role": "Course Attended Submitter", "owner_doctype": "Course Attended"},
+		{"app_role": "Data Viewer", "owner_doctype": None},
+		{"app_role": "Can Import Data", "owner_doctype": None},
+		{"app_role": "Can Backup NAS", "owner_doctype": None},
+		{"app_role": "Database Operator Manager", "owner_doctype": "Create Operator"},
+		{"app_role": "Mission Amender", "owner_doctype": "Mission"},
+		{"app_role": "Mission Canceller", "owner_doctype": "Mission"},
+		{"app_role": "Mission Creator", "owner_doctype": "Mission"},
+		{"app_role": "Mission Deleter", "owner_doctype": "Mission"},
+		{"app_role": "Mission Editor", "owner_doctype": "Mission"},
+		{"app_role": "Mission Reader", "owner_doctype": "Mission"},
+		{"app_role": "Mission Submitter", "owner_doctype": "Mission"},
+		{"app_role": "Part 2 Order Amender", "owner_doctype": "Part 2 Order"},
+		{"app_role": "Part 2 Order Canceller", "owner_doctype": "Part 2 Order"},
+		{"app_role": "Part 2 Order Creator", "owner_doctype": "Part 2 Order"},
+		{"app_role": "Part 2 Order Deleter", "owner_doctype": "Part 2 Order"},
+		{"app_role": "Part 2 Order Editor", "owner_doctype": "Part 2 Order"},
+		{"app_role": "Part 2 Order Reader", "owner_doctype": "Part 2 Order"},
+		{"app_role": "Part 2 Order Submitter", "owner_doctype": "Part 2 Order"},
+		{"app_role": "Personnel Creator", "owner_doctype": "Personnel"},
+		{"app_role": "Personnel Deleter", "owner_doctype": "Personnel"},
+		{"app_role": "Personnel Editor", "owner_doctype": "Personnel"},
+		{"app_role": "Personnel Reader", "owner_doctype": "Personnel"},
+		{"app_role": "Posting Authority Amender", "owner_doctype": "Posting Authority"},
+		{"app_role": "Posting Authority Canceller", "owner_doctype": "Posting Authority"},
+		{"app_role": "Posting Authority Creator", "owner_doctype": "Posting Authority"},
+		{"app_role": "Posting Authority Deleter", "owner_doctype": "Posting Authority"},
+		{"app_role": "Posting Authority Editor", "owner_doctype": "Posting Authority"},
+		{"app_role": "Posting Authority Reader", "owner_doctype": "Posting Authority"},
+		{"app_role": "Posting Authority Submitter", "owner_doctype": "Posting Authority"},
+		{"app_role": "Promotion Amender", "owner_doctype": "Promotion"},
+		{"app_role": "Promotion Canceller", "owner_doctype": "Promotion"},
+		{"app_role": "Promotion Creator", "owner_doctype": "Promotion"},
+		{"app_role": "Promotion Deleter", "owner_doctype": "Promotion"},
+		{"app_role": "Promotion Editor", "owner_doctype": "Promotion"},
+		{"app_role": "Promotion Reader", "owner_doctype": "Promotion"},
+		{"app_role": "Promotion Submitter", "owner_doctype": "Promotion"},
+		{"app_role": "Reference Data Creator", "owner_doctype": "Reference Data"},
+		{"app_role": "Reference Data Deleter", "owner_doctype": "Reference Data"},
+		{"app_role": "Reference Data Editor", "owner_doctype": "Reference Data"},
+		{"app_role": "Reference Data Reader", "owner_doctype": "Reference Data"},
+		{"app_role": "Strength Returns Amender", "owner_doctype": "Strength Returns"},
+		{"app_role": "Strength Returns Canceller", "owner_doctype": "Strength Returns"},
+		{"app_role": "Strength Returns Creator", "owner_doctype": "Strength Returns"},
+		{"app_role": "Strength Returns Deleter", "owner_doctype": "Strength Returns"},
+		{"app_role": "Strength Returns Editor", "owner_doctype": "Strength Returns"},
+		{"app_role": "Strength Returns Reader", "owner_doctype": "Strength Returns"},
+		{"app_role": "Strength Returns Submitter", "owner_doctype": "Strength Returns"},
+		{"app_role": "Atts and Dets Creator", "owner_doctype": "Personnel Att and Dets Form"},
+		{"app_role": "Atts and Dets  Amender", "owner_doctype": "Personnel Att and Dets Form"},
+		{"app_role": "Atts and Dets Canceller", "owner_doctype": "Personnel Att and Dets Form"},
+		{"app_role": "Atts and Dets Editor", "owner_doctype": "Personnel Att and Dets Form"},
+		{"app_role": "Atts and Dets Reader", "owner_doctype": "Personnel Att and Dets Form"},
+		{"app_role": "Atts and Dets Submitter", "owner_doctype": "Personnel Att and Dets Form"},
+		{"app_role": "Atts and Dets Deleter", "owner_doctype": "Personnel Att and Dets Form"},
 	]
 	
 	inserted_count = 0
@@ -1606,7 +1457,6 @@ def insert_app_role_list():
 	for entry in app_role_entries:
 		role_name = entry["app_role"]
 		owner_doctype = entry.get("owner_doctype")
-		want_active = 1 if entry.get("active") else 0
 		
 		# Check if role exists in Role doctype
 		# If role doesn't exist, skip it (not an error - roles may be created separately)
@@ -1619,23 +1469,17 @@ def insert_app_role_list():
 		existing_entry = frappe.db.get_value("App Role List", {"app_role": role_name}, "name")
 		
 		if existing_entry:
-			try:
-				existing_doc = frappe.get_doc("App Role List", existing_entry)
-				changed = False
-				cur_od = existing_doc.owner_doctype or None
-				new_od = owner_doctype or None
-				if cur_od != new_od:
-					existing_doc.owner_doctype = owner_doctype
-					changed = True
-				if int(existing_doc.active or 0) != want_active:
-					existing_doc.active = want_active
-					changed = True
-				if changed:
-					existing_doc.save(ignore_permissions=True)
-			except Exception as e:
-				error_msg = f"Error updating '{role_name}': {str(e)}"
-				error_details.append(error_msg)
-				error_count += 1
+			# Update owner_doctype if it's different and provided
+			if owner_doctype:
+				try:
+					existing_doc = frappe.get_doc("App Role List", existing_entry)
+					if existing_doc.owner_doctype != owner_doctype:
+						existing_doc.owner_doctype = owner_doctype
+						existing_doc.save(ignore_permissions=True)
+				except Exception as e:
+					error_msg = f"Error updating '{role_name}': {str(e)}"
+					error_details.append(error_msg)
+					error_count += 1
 			skipped_count += 1
 			continue
 		
@@ -1644,8 +1488,7 @@ def insert_app_role_list():
 			app_role_list_doc = frappe.get_doc({
 				"doctype": "App Role List",
 				"app_role": role_name,
-				"owner_doctype": owner_doctype,
-				"active": want_active,
+				"owner_doctype": owner_doctype
 			})
 			app_role_list_doc.insert(ignore_permissions=True)
 			inserted_count += 1

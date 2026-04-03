@@ -32,6 +32,37 @@ frappe.pages["course-feedback"].on_page_load = function (wrapper) {
 				color: #0c4a6e;
 				font-size: 15px;
 			}
+			.cfb-card-header-row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 12px;
+			}
+			.cfb-card-header-title {
+				display: inline-flex;
+				align-items: center;
+				gap: 8px;
+				min-width: 0;
+			}
+			.cfb-btn-back-header {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				padding: 6px 12px;
+				font-size: 13px;
+				border-radius: 8px;
+				border: 1px solid #bae6fd;
+				background: rgba(255, 255, 255, 0.75);
+				color: #0c4a6e;
+				cursor: pointer;
+				font-weight: 500;
+				flex-shrink: 0;
+			}
+			.cfb-btn-back-header:hover {
+				background: #fff;
+				border-color: #7dd3fc;
+				color: #0369a1;
+			}
 			.cfb-card-body { padding: 20px; }
 			.cfb-label { font-size: 12px; color: #64748b; margin-bottom: 6px; font-weight: 500; }
 			.cfb-input {
@@ -82,7 +113,9 @@ frappe.pages["course-feedback"].on_page_load = function (wrapper) {
 	var html = `
 		<div class="cfb-wrap">
 			<div class="cfb-card" id="cfb-step-access">
-				<div class="cfb-card-header"><i class="fa fa-key"></i> ${__("Access code")}</div>
+				<div class="cfb-card-header cfb-card-header-row">
+					<span class="cfb-card-header-title"><i class="fa fa-key"></i> ${__("Access code")}</span>
+				</div>
 				<div class="cfb-card-body">
 					<p class="cfb-muted">${__(
 						"Enter your Course Attendance reference (e.g. full document name) or your service number."
@@ -101,12 +134,24 @@ frappe.pages["course-feedback"].on_page_load = function (wrapper) {
 			</div>
 
 			<div class="cfb-card cfb-hidden" id="cfb-step-pick">
-				<div class="cfb-card-header"><i class="fa fa-list"></i> ${__("Select course")}</div>
-				<div class="cfb-card-body" id="cfb-pick-body"></div>
+				<div class="cfb-card-header cfb-card-header-row">
+					<span class="cfb-card-header-title"><i class="fa fa-list"></i> ${__("Select course")}</span>
+					<button type="button" class="cfb-btn-back-header" id="cfb-btn-pick-back" title="${__("Back")}">
+						<i class="fa fa-arrow-left"></i> ${__("Back")}
+					</button>
+				</div>
+				<div class="cfb-card-body">
+					<div id="cfb-pick-body"></div>
+				</div>
 			</div>
 
 			<div class="cfb-card cfb-hidden" id="cfb-step-form">
-				<div class="cfb-card-header"><i class="fa fa-comment"></i> ${__("Your feedback")}</div>
+				<div class="cfb-card-header cfb-card-header-row">
+					<span class="cfb-card-header-title"><i class="fa fa-comment"></i> ${__("Your feedback")}</span>
+					<button type="button" class="cfb-btn-back-header" id="cfb-btn-back" title="${__("Back")}">
+						<i class="fa fa-arrow-left"></i> ${__("Back")}
+					</button>
+				</div>
 				<div class="cfb-card-body">
 					<div id="cfb-context-summary"></div>
 					<div class="cfb-label" style="margin-top: 16px;">${__("Feedback")} <span style="color:#dc2626">*</span></div>
@@ -124,9 +169,6 @@ frappe.pages["course-feedback"].on_page_load = function (wrapper) {
 					<div style="margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap;">
 						<button type="button" class="cfb-btn cfb-btn-primary" id="cfb-btn-save">
 							<i class="fa fa-save"></i> ${__("Save draft")}
-						</button>
-						<button type="button" class="cfb-btn cfb-btn-outline" id="cfb-btn-back">
-							<i class="fa fa-arrow-left"></i> ${__("Back")}
 						</button>
 					</div>
 					<p class="cfb-muted" id="cfb-after-save"></p>
@@ -406,12 +448,20 @@ frappe.pages["course-feedback"].on_page_load = function (wrapper) {
 		});
 	}
 
-	document.getElementById("cfb-btn-resolve").addEventListener("click", resolve);
-	document.getElementById("cfb-btn-save").addEventListener("click", saveDraft);
-	document.getElementById("cfb-btn-back").addEventListener("click", function () {
+	function backToAccess() {
 		showStep("access");
 		state.context = null;
-	});
+		var accessInput = document.getElementById("cfb-access-code");
+		if (accessInput) {
+			accessInput.focus();
+			accessInput.select();
+		}
+	}
+
+	document.getElementById("cfb-btn-resolve").addEventListener("click", resolve);
+	document.getElementById("cfb-btn-save").addEventListener("click", saveDraft);
+	document.getElementById("cfb-btn-pick-back").addEventListener("click", backToAccess);
+	document.getElementById("cfb-btn-back").addEventListener("click", backToAccess);
 
 	document.getElementById("cfb-access-code").addEventListener("keydown", function (e) {
 		if (e.key === "Enter") resolve();

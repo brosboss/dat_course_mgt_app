@@ -13,7 +13,10 @@ app_license = "MIT"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/dat_pm/css/dat_pm.css"
 # Shared helpers (hideDefaultSidebarCSS, getNavigationSidebar, etc.) for Nacstnew desk pages
-app_include_js = "/assets/dat_pm/js/navigation_sidebar.js"
+app_include_js = [
+	"/assets/dat_pm/js/navigation_sidebar.js", 
+	"/assets/dat_pm/js/redirect.js"
+]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/dat_pm/css/dat_pm.css"
@@ -60,7 +63,7 @@ app_include_js = "/assets/dat_pm/js/navigation_sidebar.js"
 #	"methods": "dat_pm.utils.jinja_methods",
 #	"filters": "dat_pm.utils.jinja_filters"
 # }
-
+required_apps = ["nxt_theme"]
 # Installation
 # ------------
 
@@ -95,9 +98,9 @@ app_include_js = "/assets/dat_pm/js/navigation_sidebar.js"
 # ---------------
 # Override standard doctype classes
 
-# override_doctype_class = {
-#	"ToDo": "custom_app.overrides.CustomToDo"
-# }
+override_doctype_class = {
+	"Page": "dat_pm.nacstnew.overrides.page.CustomPage",
+}
 
 # Document Events
 # ---------------
@@ -153,7 +156,7 @@ scheduler_events = {
 
 # Request Events
 # ----------------
-# before_request = ["dat_pm.utils.before_request"]
+before_request = ["dat_pm.utils.feedback_only_access.before_request_feedback_only_guard"]
 # after_request = ["dat_pm.utils.after_request"]
 
 # Job Events
@@ -187,6 +190,10 @@ scheduler_events = {
 
 # Authentication and authorization
 # --------------------------------
+
+on_login = "dat_pm.utils.feedback_only_access.on_login_redirect"
+
+boot_session = "dat_pm.utils.feedback_only_access.boot_session"
 
 # auth_hooks = [
 #	"dat_pm.auth.validate"

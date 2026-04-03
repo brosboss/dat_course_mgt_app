@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from frappe.utils.data import strip_html
 
 from dat_pm.nacstnew.doctype.course_nomination.course_nomination import compute_course_attended_status
+from dat_pm.utils.feedback_only_access import get_course_feedback_operator_service_number
 
 
 def _plain_text_to_feedback_html(text):
@@ -36,6 +37,14 @@ def _course_attended_open_for_feedback(ca_name):
 	if frappe.db.exists("Feedback", {"course_reference": ca_name, "docstatus": 1}):
 		return False
 	return True
+
+
+def _enforce_course_feedback_operator_service_match(course_attended_name):
+	"""Course Attended must belong to the current user's service number from Create Operator."""
+	allowed_sn = get_course_feedback_operator_service_number()
+	ca_sn = frappe.db.get_value("Course Attended", course_attended_name, "service_number")
+	if ca_sn != allowed_sn:
+		frappe.throw(_("You are not allowed to access feedback for this course."))
 
 
 def _course_attended_row_context(ca_name):
@@ -96,7 +105,12 @@ def resolve_course_feedback_access(access_code):
 	if not access_code:
 		frappe.throw(_("Please enter your access code."))
 
+	allowed_sn = get_course_feedback_operator_service_number()
+
 	if frappe.db.exists("Course Attended", access_code):
+		ca_sn = frappe.db.get_value("Course Attended", access_code, "service_number")
+		if ca_sn != allowed_sn:
+			frappe.throw(_("You are not allowed to access feedback for this course attendance record."))
 		if not _course_attended_open_for_feedback(access_code):
 			frappe.throw(
 				_("This course is not open for feedback (not submitted, or feedback already submitted).")
@@ -107,6 +121,8 @@ def resolve_course_feedback_access(access_code):
 		}
 
 	if frappe.db.exists("Personnel", access_code):
+		if access_code != allowed_sn:
+			frappe.throw(_("Invalid access code. Use your assigned service number."))
 		rows = frappe.get_all(
 			"Course Attended",
 			filters={"service_number": access_code, "docstatus": 1},
@@ -145,6 +161,7 @@ def resolve_course_feedback_access(access_code):
 @frappe.whitelist()
 def get_feedback_grade_options():
 	"""Return selectable Grade options for Course Feedback page."""
+	get_course_feedback_operator_service_number()
 	return frappe.get_all("Grade", pluck="name", order_by="name asc")
 
 
@@ -156,6 +173,7 @@ def get_course_feedback_form_data(course_attended_name):
 		frappe.throw(_("Course reference is required."))
 	if not _course_attended_open_for_feedback(course_attended_name):
 		frappe.throw(_("This course is not open for feedback."))
+	_enforce_course_feedback_operator_service_match(course_attended_name)
 	return {"context": _course_attended_row_context(course_attended_name)}
 
 
@@ -169,6 +187,7 @@ def save_course_feedback_draft(course_attended_name, course_feedback, grade=None
 		frappe.throw(_("Course reference is required."))
 	if not _course_attended_open_for_feedback(course_attended_name):
 		frappe.throw(_("This course is not open for feedback."))
+	_enforce_course_feedback_operator_service_match(course_attended_name)
 
 	course_feedback = (course_feedback or "").strip()
 	if not course_feedback:
@@ -233,6 +252,7 @@ def upload_feedback_course_report_for_page():
 		frappe.throw(_("Only draft feedback can be updated from this page."))
 	if not _course_attended_open_for_feedback(fb.course_reference):
 		frappe.throw(_("This course is not open for feedback."))
+	_enforce_course_feedback_operator_service_match(fb.course_reference)
 
 	files = frappe.request.files
 	if "file" not in files:

@@ -95,12 +95,14 @@
    "label": "Personal Information"
   },
   {
+   "depends_on": "eval:doc.category == \"Officer\"",
    "fieldname": "type_of_commission",
    "fieldtype": "Link",
    "label": "Type of Commission",
    "options": "Type of Commission"
   },
   {
+   "depends_on": "eval:doc.category == \"Officer\"",
    "fieldname": "course",
    "fieldtype": "Link",
    "label": "Course",
@@ -219,7 +221,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "**From Posting Record**",
    "fieldname": "current_rank",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -267,6 +268,7 @@
   {
    "fieldname": "mission_tab",
    "fieldtype": "Tab Break",
+   "hidden": 1,
    "label": "Mission"
   },
   {
@@ -294,6 +296,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.category == \"Officer\"",
    "fetch_from": "course.date_of__commission",
    "fieldname": "date_of__commission",
    "fieldtype": "Date",
@@ -323,6 +326,7 @@
   {
    "fieldname": "personnel_unit_reference_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Personnel Unit Reference"
   },
   {
@@ -360,7 +364,8 @@
   },
   {
    "fieldname": "section_break_zpop",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "personnel_attachement_section",
@@ -448,13 +453,12 @@
    "fieldtype": "Section Break"
   }
  ],
- "hide_toolbar": 1,
  "image_field": "personnel_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-31 20:40:16.963271",
+ "modified": "2026-04-03 17:43:16.329536",
  "modified_by": "Administrator",
- "module": "nacstnew",
+ "module": "Nacstnew",
  "name": "Personnel",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
@@ -661,6 +665,7 @@
    "role": "Can Import Data"
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
