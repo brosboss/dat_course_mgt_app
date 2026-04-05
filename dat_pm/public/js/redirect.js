@@ -11,6 +11,9 @@ frappe.router.on("change", function () {
     if (route && route[0] === "Workspaces" && route[1] === "Real Time Audit Log") {
         frappe.set_route("app/rtal");
     }
+    if (route && route[0] === "Workspaces" && route[1] === "NAPMA") {
+        frappe.set_route("app/napma-analysis-2");
+    }
     if (route && route[0] === "Workspaces" && route[1] === "Personnel Analysis") {
         frappe.set_route("app/personnel-list");
     }

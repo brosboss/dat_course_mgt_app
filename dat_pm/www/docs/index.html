@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{{ title or "Dat PM — User Guide" }}</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/docs/index.css">
+    <link rel="icon" href="/files/app_logo.png" type="image/png">
+</head>
+<body class="docs-body">
+	<div class="docs-bg-layer" aria-hidden="true">
+		<div class="docs-orb docs-orb-a"></div>
+		<div class="docs-orb docs-orb-b"></div>
+		<div class="docs-orb docs-orb-c"></div>
+		<div class="docs-grid"></div>
+	</div>
+
+	<div class="docs-page">
+		<div class="docs-wrap">
+			<header class="docs-header docs-reveal">
+				<p class="docs-kicker"><span class="docs-kicker-dot"></span> End-user guide</p>
+				<h1><span class="docs-title-gradient">Dat PM</span> — User guide</h1>
+				<p class="lead">How to use the personnel and training features in Dat PM, with emphasis on <strong>course nomination</strong>, eligibility, attendance records, and feedback.</p>
+			</header>
+
+			<nav class="docs-nav docs-reveal docs-reveal-1" aria-label="On this page">
+				<strong>Contents</strong>
+				<ul>
+					<li><a href="#overview">What this system is for</a></li>
+					<li><a href="#concepts">How training pieces fit together</a></li>
+					<li><a href="#course-name">Course catalogue (reference)</a></li>
+					<li><a href="#eligibility">Who can be nominated — qualification rules</a></li>
+					<li><a href="#nomination-flow">Course nomination — step by step</a></li>
+					<li><a href="#nomination-form">Course nomination record (desk form)</a></li>
+					<li><a href="#after-submit">After you submit a nomination</a></li>
+					<li><a href="#personnel-details">Personnel course details (lookup page)</a></li>
+					<li><a href="#feedback">Course feedback (trainees)</a></li>
+					<li><a href="#beyond-training">Beyond training — personnel and reference data</a></li>
+					<li><a href="#dashboards">Dashboards and workspaces</a></li>
+					<li><a href="#access">Access and roles</a></li>
+				</ul>
+			</nav>
+
+			<section id="overview" class="docs-section docs-card docs-reveal docs-reveal-2">
+				<h2>What this system is for</h2>
+				<p>Dat PM supports personnel administration including <strong>training</strong>: maintaining a catalogue of courses, recording who is nominated for each run, tracking attendance dates and status, and collecting course feedback. Your organisation may use some or all of these parts depending on your role.</p>
+				<p>This guide describes behaviour as implemented in the application. It is written for <strong>end users</strong> (training staff, administrators, and course participants), not for developers.</p>
+			</section>
+
+			<section id="concepts" class="docs-section docs-card docs-reveal docs-reveal-3">
+				<h2>How training pieces fit together</h2>
+				<p>These are the main ideas to keep in mind:</p>
+				<ul>
+					<li><strong>Personnel</strong> — Each member has a <strong>service number</strong>, name, <strong>current rank</strong>, and <strong>current unit</strong>. Nomination and eligibility use this information.</li>
+					<li><strong>Course Name</strong> — The training catalogue entry for a course. It defines which <strong>ranks</strong> may attend and which earlier courses are <strong>mandatory prerequisites</strong>.</li>
+					<li><strong>Course nomination</strong> — A formal list of personnel selected for a <em>specific run</em> of a course (with dates, organising body, and other run details). It can be saved as a draft, submitted when final, or cancelled.</li>
+					<li><strong>Course attended</strong> — After a nomination is <strong>submitted</strong>, the system creates an attendance record for each nominated person, tied to that nomination. Dates and course status come from the nomination and later activity (such as feedback).</li>
+					<li><strong>Feedback</strong> — A submitted evaluation linked to a course attendance record. It can affect how the system labels completion for reporting.</li>
+				</ul>
+				<div class="docs-callout">
+					<strong>Important:</strong> Qualification for nomination is automatic: the system only treats someone as eligible if their rank, prerequisite history, and “already attended” status satisfy the rules for that course name. You cannot bypass those rules when saving a new nomination with ineligible names mixed in.
+				</div>
+			</section>
+
+			<section id="course-name" class="docs-section docs-card docs-reveal docs-reveal-4">
+				<h2>Course catalogue (reference)</h2>
+				<p>Training administrators maintain <strong>Course Name</strong> records (the catalogue). Each course typically includes:</p>
+				<ul>
+					<li><strong>Qualified rank</strong> — One or more ranks allowed to attend this course.</li>
+					<li><strong>Mandatory prerequisite course</strong> — Other courses that must already appear on a person’s <strong>submitted</strong> attendance history before they are treated as eligible for this course.</li>
+					<li>Optional metadata such as abbreviation, frequency, or course materials.</li>
+				</ul>
+				<p>If no qualified ranks are set for a course, <strong>nobody</strong> will appear as “due” or qualified for that course until the catalogue is corrected.</p>
+			</section>
+
+			<section id="eligibility" class="docs-section docs-card docs-reveal docs-reveal-5">
+				<h2>Who can be nominated — qualification rules</h2>
+				<p>For a given <strong>course name</strong>, a person is treated as <strong>qualified</strong> (eligible to appear on the “personnel due” lists and to be saved) only if <em>all</em> of the following are true:</p>
+				<ol>
+					<li>Their <strong>current rank</strong> is listed under that course’s <strong>Qualified rank</strong> in the catalogue.</li>
+					<li>They have <strong>not</strong> already completed this same course in a <strong>submitted</strong> attendance record.</li>
+					<li>Every <strong>mandatory prerequisite</strong> course listed for this course appears on their history as a <strong>submitted</strong> attendance for that prerequisite course.</li>
+				</ol>
+				<p>If something fails (wrong rank, missing prerequisite, or duplicate attendance for that course), the system explains why when you use the <strong>Why?</strong> actions in the nomination experience.</p>
+				<div class="docs-note">
+					When you edit an <strong>existing</strong> nomination, rows that were already saved may not be re-checked live for rank or attendance changes; new rows and changed service numbers are validated. If in doubt, coordinate with your training administrator to keep nominations accurate.
+				</div>
+			</section>
+
+			<section id="nomination-flow" class="docs-section docs-card docs-reveal docs-reveal-6">
+				<h2>Course nomination — step by step</h2>
+				<p>The main workflow is the desk page titled <strong>Course Nomination</strong> (internal route <span class="docs-path">course-nomination-an</span>). Open it from your training or course nomination workspace if your administrator has given you access.</p>
+
+				<h3>Modes: New vs Edit</h3>
+				<ul>
+					<li><strong>New nomination</strong> — Choose a course from the catalogue, define a <strong>course suffix</strong>, enter run details, pick people, then save.</li>
+					<li><strong>Edit nomination</strong> — Search for an existing course nomination record (draft or submitted). The course and suffix come from that record; you can update people and (depending on status) run details.</li>
+				</ul>
+
+				<h3>Course suffix and document name</h3>
+				<p>For a <strong>new</strong> nomination you must enter a <strong>Course suffix</strong> (for example a batch code, week number, or year-week label). The system combines it with the course name to form the <strong>nomination’s unique name</strong> so each run is distinct.</p>
+
+				<h3>Course run details</h3>
+				<p>Provide at least:</p>
+				<ul>
+					<li><strong>Organising body</strong></li>
+					<li><strong>Start date</strong> and <strong>End date</strong> (end date cannot be before start date)</li>
+				</ul>
+
+				<h3>Personnel due for this course</h3>
+				<p>The left panel lists everyone the system considers <strong>qualified</strong> for the selected course. Use checkboxes to select people (already-added names appear highlighted). Use <strong>Add selected to nomination</strong> to move them to the nominated list.</p>
+				<p>Use <strong>Why?</strong> next to a name to see a short explanation of qualified vs not qualified.</p>
+
+				<h3>Nominated personnel</h3>
+				<p>The right panel is your working list. You can <strong>Remove</strong> someone before saving. Rows that are not qualified show in red; you must remove them before the page will save.</p>
+
+				<h3>Saving</h3>
+				<p><strong>Save as Course Nomination</strong> (new) or <strong>Update nomination</strong> (edit) creates or updates the official record and then opens it in the standard desk form. Missing organising body, dates, or suffix (new only) will block saving.</p>
+
+				<h3>Editing after the course end date</h3>
+				<p>If you open a submitted nomination whose <strong>end date is in the past</strong>, the page may start in a read-only state. Use <strong>Edit anyway</strong> when shown to unlock changes. For <strong>submitted</strong> nominations, updates from this page typically adjust the <strong>nominated personnel list</strong> only; other header fields may need to be changed on the desk form if your process allows it.</p>
+
+				<h3>Cancelled nominations</h3>
+				<p>A <strong>cancelled</strong> nomination is read-only on this page; you cannot save updates to it here.</p>
+			</section>
+
+			<section id="nomination-form" class="docs-section docs-card docs-reveal docs-reveal-7">
+				<h2>Course nomination record (desk form)</h2>
+				<p>You can also work from the <strong>Course Nomination</strong> list and form in the desk, which holds the same information with additional optional fields (category, location, fee, materials, status, and so on).</p>
+				<ul>
+					<li>A custom button may open the <strong>Course Nomination</strong> page described above.</li>
+					<li>The form shows a summary of how many personnel meet qualification rules and offers <strong>View qualified personnel</strong> to browse everyone qualified, with counts by unit/rank and indicators if someone is already listed on <em>another</em> nomination for the same course.</li>
+					<li><strong>Why Qualified?</strong> helps explain the last edited row’s eligibility.</li>
+				</ul>
+				<p>On <strong>first save</strong>, every nominated service number must be qualified; the system will reject the save if not.</p>
+				<p><strong>Submitting</strong> a nomination is the action that registers the official attendance placeholders. <strong>Cancel</strong> reverses linked attendance records according to your organisation’s process.</p>
+			</section>
+
+			<section id="after-submit" class="docs-section docs-card docs-reveal docs-reveal-8">
+				<h2>After you submit a nomination</h2>
+				<p>When a course nomination is <strong>submitted</strong>, the system creates or updates a <strong>Course attended</strong> record for each nominated service number, linked to that nomination. Course dates on those records follow the nomination’s start and end dates.</p>
+
+				<h3>Course status on attendance</h3>
+				<p>Attendance rows can show a <strong>Course status</strong> such as:</p>
+				<table class="docs-table">
+					<thead>
+						<tr>
+							<th>Status</th>
+							<th>Meaning (typical)</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Upcoming</td>
+							<td>Before the course start date.</td>
+						</tr>
+						<tr>
+							<td>On Course</td>
+							<td>Current date is between start and end (inclusive).</td>
+						</tr>
+						<tr>
+							<td>Completed with no Feedback</td>
+							<td>After the end date, and no submitted feedback is linked yet.</td>
+						</tr>
+						<tr>
+							<td>Completed</td>
+							<td>After the end date with submitted feedback.</td>
+						</tr>
+						<tr>
+							<td>Deferred / Absent / Overdue</td>
+							<td>Other operational states your organisation may set or report on; some values may be maintained manually outside automatic date rules.</td>
+						</tr>
+					</tbody>
+				</table>
+				<p>The system can refresh the automatically managed statuses on a schedule. Values outside that set (for example <strong>Deferred</strong>) may be preserved when updating.</p>
+			</section>
+
+			<section id="personnel-details" class="docs-section docs-card docs-reveal docs-reveal-9">
+				<h2>Personnel course details (lookup page)</h2>
+				<p>The <strong>Personnel Course Details</strong> desk page lets you pick a person and view two columns:</p>
+				<ul>
+					<li><strong>Courses attended</strong> — Their submitted history.</li>
+					<li><strong>Courses eligible for</strong> — Courses they could be nominated for next; eligibility matches nomination (rank, prerequisites, and not already attended).</li>
+				</ul>
+				<p>Use it for quick answers without building a nomination.</p>
+			</section>
+
+			<section id="feedback" class="docs-section docs-card docs-reveal docs-reveal-10">
+				<h2>Course feedback (trainees)</h2>
+				<p>The <strong>Course Feedback</strong> desk page lets participants submit feedback against a <strong>course attendance</strong> record. They enter a <strong>reference</strong> (often the full attendance document name) or their <strong>service number</strong>; if several courses match, the page asks which one to rate.</p>
+				<p>Some users have a restricted role that sends them <strong>only</strong> to this page after login; they cannot browse the rest of the desk. Those accounts must be linked correctly in the <strong>Create Operator</strong> setup and email matching rules your administrator configures.</p>
+			</section>
+
+			<section id="beyond-training" class="docs-section docs-card docs-reveal docs-reveal-11">
+				<h2>Beyond training — personnel and reference data</h2>
+				<p>Dat PM also supports wider personnel administration: master data (such as <strong>units</strong>, <strong>ranks</strong>, locations, grades), the main <strong>Personnel</strong> record with posting and promotion history, imports, postings (including Part&nbsp;2 orders), strength returns, and specialised desk pages your organisation may enable. Training depends on accurate personnel ranks and complete attendance history, so keeping personnel and catalogue records up to date is part of a healthy nomination process.</p>
+				<p>Administrators typically use the <strong>ADMIN Dashboard</strong> workspace to open reference lists, personnel, course attendance, nominations, and feedback-related shortcuts.</p>
+			</section>
+
+			<section id="dashboards" class="docs-section docs-card docs-reveal docs-reveal-12">
+				<h2>Dashboards and workspaces</h2>
+				<p>Depending on permissions you may see:</p>
+				<ul>
+					<li><strong>Training Dashboard</strong>, <strong>Course Nomination Page</strong>, and <strong>Personnel Course</strong> workspaces — entry points for training tools.</li>
+					<li><strong>TRG Dashboard</strong> — A command-style overview with nomination-related activity (exact widgets depend on configuration).</li>
+					<li><strong>ADMIN Dashboard</strong> — Reference masters, personnel, and training records (administrator-oriented).</li>
+				</ul>
+			</section>
+
+			<section id="access" class="docs-section docs-card docs-reveal docs-reveal-13">
+				<h2>Access and roles</h2>
+				<p>What you see is controlled by your user roles. Examples include roles that can <strong>create</strong>, <strong>read</strong>, <strong>submit</strong>, <strong>cancel</strong>, or <strong>amend</strong> course nominations, maintain reference data, or submit feedback only. If you cannot open a page or save a record, ask your system administrator to assign the correct role or to fix catalogue data (ranks and prerequisites).</p>
+			</section>
+
+			<footer class="docs-footer docs-reveal docs-reveal-14">
+				<p>Dat PM user documentation — training and course nomination. For system setup and technical support, contact your organisation’s administrator.</p>
+			</footer>
+		</div>
+	</div>
+</body>
+</html>
