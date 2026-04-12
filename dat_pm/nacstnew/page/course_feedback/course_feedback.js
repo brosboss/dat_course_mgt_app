@@ -11,6 +11,7 @@ frappe.pages["course-feedback"].on_page_load = function (wrapper) {
 	var state = {
 		context: null,
 		grade_options: [],
+		rating_stars: 0,
 	};
 
 	page.add_inner_message(`
@@ -107,6 +108,19 @@ frappe.pages["course-feedback"].on_page_load = function (wrapper) {
 			.cfb-table th { background: #f8fafc; color: #475569; font-weight: 600; }
 			.cfb-badge { font-size: 10px; padding: 2px 8px; border-radius: 999px; background: #fef3c7; color: #92400e; }
 			.cfb-hidden { display: none !important; }
+			.cfb-rating-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 4px; }
+			.cfb-rating-star {
+				background: none; border: none; padding: 4px 2px; cursor: pointer; color: #cbd5e1;
+				font-size: 22px; line-height: 1; transition: color 0.15s ease, transform 0.12s ease;
+			}
+			.cfb-rating-star:hover { transform: scale(1.12); color: #fde68a; }
+			.cfb-rating-star.is-on { color: #f59e0b; }
+			.cfb-rating-star:focus { outline: 2px solid #0284c7; outline-offset: 2px; border-radius: 4px; }
+			.cfb-rating-clear {
+				font-size: 12px; color: #64748b; background: none; border: none; cursor: pointer;
+				text-decoration: underline; padding: 4px 0;
+			}
+			.cfb-rating-clear:hover { color: #0369a1; }
 		</style>
 	`);
 
@@ -156,6 +170,12 @@ frappe.pages["course-feedback"].on_page_load = function (wrapper) {
 					<div id="cfb-context-summary"></div>
 					<div class="cfb-label" style="margin-top: 16px;">${__("Feedback")} <span style="color:#dc2626">*</span></div>
 					<textarea class="cfb-textarea" id="cfb-feedback-text" placeholder="${__("Write your feedback here…")}"></textarea>
+					<div class="cfb-label" style="margin-top: 16px;">${__("Rating")}</div>
+					<p class="cfb-muted" style="margin-top: 0;">${__("Optional: tap a star (1–5).")}</p>
+					<div class="cfb-rating-row">
+						<div id="cfb-rating" role="group" aria-label="${__("Rating")}"></div>
+						<button type="button" class="cfb-rating-clear" id="cfb-rating-clear">${__("Clear")}</button>
+					</div>
 					<div class="cfb-label" style="margin-top: 16px;">${__("Grade")}</div>
 					<select class="cfb-input" id="cfb-grade-select">
 						<option value="">${__("Select grade (optional)")}</option>
@@ -205,6 +225,49 @@ frappe.pages["course-feedback"].on_page_load = function (wrapper) {
 				"</a>";
 		} else {
 			wrap.innerHTML = "";
+		}
+	}
+
+	function starsFromStoredRating(val) {
+		if (val === null || val === undefined || val === "") {
+			return 0;
+		}
+		var r = Number(val);
+		if (Number.isNaN(r) || r <= 0) {
+			return 0;
+		}
+		var s = Math.round(r * 5);
+		return Math.max(0, Math.min(5, s));
+	}
+
+	function setRatingStars(n) {
+		state.rating_stars = Math.max(0, Math.min(5, parseInt(n, 10) || 0));
+		renderRatingStars();
+	}
+
+	function ratingPayloadFromStars() {
+		if (!state.rating_stars) {
+			return null;
+		}
+		return state.rating_stars / 5;
+	}
+
+	function renderRatingStars() {
+		var wrap = document.getElementById("cfb-rating");
+		if (!wrap) return;
+		wrap.innerHTML = "";
+		for (var i = 1; i <= 5; i++) {
+			var btn = document.createElement("button");
+			btn.type = "button";
+			btn.className = "cfb-rating-star" + (i <= state.rating_stars ? " is-on" : "");
+			btn.setAttribute("aria-label", __("Rating {0} of 5", [String(i)]));
+			btn.innerHTML = '<i class="fa fa-star"></i>';
+			(function (star) {
+				btn.addEventListener("click", function () {
+					setRatingStars(star);
+				});
+			})(i);
+			wrap.appendChild(btn);
 		}
 	}
 
@@ -271,6 +334,105 @@ frappe.pages["course-feedback"].on_page_load = function (wrapper) {
 			});
 	}
 
+	function renderPickCoursesList(msg) {
+		var courses = msg.courses || [];
+		var pickBody = document.getElementById("cfb-pick-body");
+		if (!pickBody) return;
+		pickBody.innerHTML =
+			"<p class='cfb-muted'>" +
+			escapeHtml(msg.personnel_name || "") +
+			" — " +
+			escapeHtml(msg.service_number || "") +
+			"</p>";
+		var wrap = document.createElement("div");
+		wrap.style.overflowX = "auto";
+		var table = document.createElement("table");
+		table.className = "cfb-table";
+		var thead = document.createElement("thead");
+		thead.innerHTML =
+			"<tr><th>#</th><th>" +
+			escapeHtml(__("Course")) +
+			"</th><th>" +
+			escapeHtml(__("Dates")) +
+			"</th><th></th></tr>";
+		table.appendChild(thead);
+		var tbody = document.createElement("tbody");
+		courses.forEach(function (c, i) {
+			var tr = document.createElement("tr");
+			var td0 = document.createElement("td");
+			td0.textContent = String(i + 1);
+			var td1 = document.createElement("td");
+			td1.appendChild(document.createTextNode(c.course_name || ""));
+			if (c.has_draft) {
+				var badge = document.createElement("span");
+				badge.className = "cfb-badge";
+				badge.style.marginLeft = "6px";
+				badge.textContent = __("Draft");
+				td1.appendChild(badge);
+			}
+			var td2 = document.createElement("td");
+			td2.textContent = (c.course_start_date || "") + " — " + (c.course_end_date || "");
+			var td3 = document.createElement("td");
+			var btn = document.createElement("button");
+			btn.type = "button";
+			btn.className = "btn btn-xs btn-primary";
+			btn.textContent = __("Select");
+			(function (caName) {
+				btn.addEventListener("click", function () {
+					frappe.call({
+						method: "dat_pm.nacstnew.doctype.feedback.feedback.get_course_feedback_form_data",
+						args: { course_attended_name: caName },
+						callback: function (r2) {
+							if (r2.exc) return;
+							if (r2.message && r2.message.context) {
+								renderForm(r2.message.context);
+							}
+						},
+					});
+				});
+			})(c.course_attended);
+			td3.appendChild(btn);
+			tr.appendChild(td0);
+			tr.appendChild(td1);
+			tr.appendChild(td2);
+			tr.appendChild(td3);
+			tbody.appendChild(tr);
+		});
+		table.appendChild(tbody);
+		wrap.appendChild(table);
+		pickBody.appendChild(wrap);
+	}
+
+	function navigateToSelectCourseAfterDraftSaved() {
+		var sn = state.context && state.context.service_number;
+		if (!sn) {
+			backToAccess();
+			return;
+		}
+		frappe.call({
+			method: "dat_pm.nacstnew.doctype.feedback.feedback.resolve_course_feedback_access",
+			args: { access_code: sn },
+			callback: function (r) {
+				if (r.exc) return;
+				var msg = r.message || {};
+				if (msg.match_type === "personnel" && (msg.courses || []).length) {
+					state.context = null;
+					renderPickCoursesList(msg);
+					showStep("pick");
+					return;
+				}
+				frappe.msgprint({
+					title: __("No open courses"),
+					message: __(
+						"There are no submitted courses pending feedback for your service number, or feedback was already submitted."
+					),
+					indicator: "orange",
+				});
+				backToAccess();
+			},
+		});
+	}
+
 	function renderForm(ctx) {
 		state.context = ctx;
 		var el = document.getElementById("cfb-context-summary");
@@ -300,6 +462,8 @@ frappe.pages["course-feedback"].on_page_load = function (wrapper) {
 			"</dd>" +
 			"</dl>";
 		document.getElementById("cfb-feedback-text").value = ctx.course_feedback_plain || "";
+		state.rating_stars = starsFromStoredRating(ctx.rating);
+		renderRatingStars();
 		renderGradeOptions();
 		var fileInput = document.getElementById("cfb-report-file");
 		if (fileInput) fileInput.value = "";
@@ -336,71 +500,7 @@ frappe.pages["course-feedback"].on_page_load = function (wrapper) {
 						});
 						return;
 					}
-					var pickBody = document.getElementById("cfb-pick-body");
-					pickBody.innerHTML =
-						"<p class='cfb-muted'>" +
-						escapeHtml(msg.personnel_name || "") +
-						" — " +
-						escapeHtml(msg.service_number || "") +
-						"</p>";
-					var wrap = document.createElement("div");
-					wrap.style.overflowX = "auto";
-					var table = document.createElement("table");
-					table.className = "cfb-table";
-					var thead = document.createElement("thead");
-					thead.innerHTML =
-						"<tr><th>#</th><th>" +
-						escapeHtml(__("Course")) +
-						"</th><th>" +
-						escapeHtml(__("Dates")) +
-						"</th><th></th></tr>";
-					table.appendChild(thead);
-					var tbody = document.createElement("tbody");
-					courses.forEach(function (c, i) {
-						var tr = document.createElement("tr");
-						var td0 = document.createElement("td");
-						td0.textContent = String(i + 1);
-						var td1 = document.createElement("td");
-						td1.appendChild(document.createTextNode(c.course_name || ""));
-						if (c.has_draft) {
-							var badge = document.createElement("span");
-							badge.className = "cfb-badge";
-							badge.style.marginLeft = "6px";
-							badge.textContent = __("Draft");
-							td1.appendChild(badge);
-						}
-						var td2 = document.createElement("td");
-						td2.textContent =
-							(c.course_start_date || "") + " — " + (c.course_end_date || "");
-						var td3 = document.createElement("td");
-						var btn = document.createElement("button");
-						btn.type = "button";
-						btn.className = "btn btn-xs btn-primary";
-						btn.textContent = __("Select");
-						(function (caName) {
-							btn.addEventListener("click", function () {
-								frappe.call({
-									method: "dat_pm.nacstnew.doctype.feedback.feedback.get_course_feedback_form_data",
-									args: { course_attended_name: caName },
-									callback: function (r2) {
-										if (r2.exc) return;
-										if (r2.message && r2.message.context) {
-											renderForm(r2.message.context);
-										}
-									},
-								});
-							});
-						})(c.course_attended);
-						td3.appendChild(btn);
-						tr.appendChild(td0);
-						tr.appendChild(td1);
-						tr.appendChild(td2);
-						tr.appendChild(td3);
-						tbody.appendChild(tr);
-					});
-					table.appendChild(tbody);
-					wrap.appendChild(table);
-					pickBody.appendChild(wrap);
+					renderPickCoursesList(msg);
 					showStep("pick");
 				}
 			},
@@ -414,12 +514,14 @@ frappe.pages["course-feedback"].on_page_load = function (wrapper) {
 		}
 		var text = document.getElementById("cfb-feedback-text").value || "";
 		var grade = (document.getElementById("cfb-grade-select").value || "").trim();
+		var ratingArg = ratingPayloadFromStars();
 		frappe.call({
 			method: "dat_pm.nacstnew.doctype.feedback.feedback.save_course_feedback_draft",
 			args: {
 				course_attended_name: state.context.course_attended,
 				course_feedback: text,
 				grade: grade,
+				feedback_rating: ratingArg,
 			},
 			callback: function (r) {
 				if (r.exc) return;
@@ -432,12 +534,17 @@ frappe.pages["course-feedback"].on_page_load = function (wrapper) {
 					updateReportDisplay();
 				}
 				state.context.grade = m.grade || grade;
+				if (m.rating !== undefined && m.rating !== null) {
+					state.context.rating = m.rating;
+				} else {
+					state.context.rating = ratingArg;
+				}
+				state.rating_stars = starsFromStoredRating(state.context.rating);
+				renderRatingStars();
 				renderGradeOptions();
 				var finalizeUi = function () {
-					document.getElementById("cfb-after-save").textContent =
-						(m.message || __("Draft saved.")) +
-						(m.name ? " " + __("Document") + ": " + m.name : "");
 					frappe.show_alert({ message: __("Draft saved."), indicator: "green" }, 4);
+					navigateToSelectCourseAfterDraftSaved();
 				};
 				if (m.name) {
 					uploadCourseReport(m.name, finalizeUi);
@@ -456,6 +563,13 @@ frappe.pages["course-feedback"].on_page_load = function (wrapper) {
 			accessInput.focus();
 			accessInput.select();
 		}
+	}
+
+	var cfbRatingClear = document.getElementById("cfb-rating-clear");
+	if (cfbRatingClear) {
+		cfbRatingClear.addEventListener("click", function () {
+			setRatingStars(0);
+		});
 	}
 
 	document.getElementById("cfb-btn-resolve").addEventListener("click", resolve);

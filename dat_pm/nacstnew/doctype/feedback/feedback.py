@@ -6,6 +6,7 @@ import html
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
 from frappe.utils.data import strip_html
 
 from dat_pm.nacstnew.doctype.course_nomination.course_nomination import compute_course_attended_status
@@ -71,12 +72,18 @@ def _course_attended_row_context(ca_name):
 	draft_feedback = ""
 	course_report = None
 	grade = ""
+	rating_val = None
 	if draft_name:
 		draft_feedback = _feedback_html_to_plain(
 			frappe.db.get_value("Feedback", draft_name, "course_feedback") or ""
 		)
 		course_report = frappe.db.get_value("Feedback", draft_name, "course_report")
 		grade = frappe.db.get_value("Feedback", draft_name, "grade") or ""
+		rating_raw = frappe.db.get_value("Feedback", draft_name, "rating")
+		if rating_raw is not None:
+			rating_val = float(flt(rating_raw))
+			if rating_val <= 0:
+				rating_val = None
 	return {
 		"course_attended": ca.name,
 		"service_number": ca.service_number,
@@ -87,6 +94,7 @@ def _course_attended_row_context(ca_name):
 		"feedback_draft_name": draft_name,
 		"course_feedback_plain": draft_feedback,
 		"grade": grade,
+		"rating": rating_val,
 		"course_report": course_report or "",
 		"has_submitted_feedback": frappe.db.exists(
 			"Feedback", {"course_reference": ca_name, "docstatus": 1}
@@ -177,8 +185,32 @@ def get_course_feedback_form_data(course_attended_name):
 	return {"context": _course_attended_row_context(course_attended_name)}
 
 
+def _normalize_feedback_rating(rating):
+	"""Rating field is 0–1 (Frappe). None/empty or out of range clears."""
+	if rating is None or rating == "":
+		return None
+	if isinstance(rating, str):
+		rating = rating.strip()
+		if not rating or rating.lower() in ("null", "none", "undefined"):
+			return None
+	rating = flt(rating)
+	if rating <= 0 or rating > 1:
+		return None
+	return float(rating)
+
+
+def _persist_feedback_rating_column(feedback_name, rating):
+	"""Write rating directly; Document._fix_rating_value turns None into 0, which breaks optional stars."""
+	if not feedback_name:
+		return
+	if rating is None:
+		frappe.db.set_value("Feedback", feedback_name, "rating", None, update_modified=True)
+	else:
+		frappe.db.set_value("Feedback", feedback_name, "rating", flt(rating), update_modified=True)
+
+
 @frappe.whitelist()
-def save_course_feedback_draft(course_attended_name, course_feedback, grade=None):
+def save_course_feedback_draft(course_attended_name, course_feedback, grade=None, rating=None, feedback_rating=None):
 	"""
 	Save Feedback as draft (docstatus 0). Uses ignore_permissions so personnel do not need Feedback doctype access.
 	"""
@@ -196,6 +228,13 @@ def save_course_feedback_draft(course_attended_name, course_feedback, grade=None
 	if grade and not frappe.db.exists("Grade", grade):
 		frappe.throw(_("Selected grade is invalid."))
 
+	raw_rating = feedback_rating if feedback_rating is not None and feedback_rating != "" else rating
+	if raw_rating is None or raw_rating == "":
+		raw_rating = frappe.form_dict.get("feedback_rating")
+	if raw_rating is None or raw_rating == "":
+		raw_rating = frappe.form_dict.get("rating")
+	rating = _normalize_feedback_rating(raw_rating)
+
 	ca = frappe.get_doc("Course Attended", course_attended_name)
 	html_feedback = _plain_text_to_feedback_html(course_feedback)
 
@@ -211,10 +250,17 @@ def save_course_feedback_draft(course_attended_name, course_feedback, grade=None
 		doc.grade = grade
 		doc.flags.ignore_permissions = True
 		doc.save()
+		_persist_feedback_rating_column(doc.name, rating)
+		doc.reload()
+		stored = frappe.db.get_value("Feedback", doc.name, "rating")
+		stored_f = float(flt(stored)) if stored is not None else None
+		if stored_f is not None and stored_f <= 0:
+			stored_f = None
 		return {
 			"name": doc.name,
 			"message": _("Draft saved."),
 			"grade": doc.grade or "",
+			"rating": stored_f,
 			"course_report": doc.course_report or "",
 		}
 
@@ -229,10 +275,17 @@ def save_course_feedback_draft(course_attended_name, course_feedback, grade=None
 	doc.grade = grade
 	doc.flags.ignore_permissions = True
 	doc.insert()
+	_persist_feedback_rating_column(doc.name, rating)
+	doc.reload()
+	stored = frappe.db.get_value("Feedback", doc.name, "rating")
+	stored_f = float(flt(stored)) if stored is not None else None
+	if stored_f is not None and stored_f <= 0:
+		stored_f = None
 	return {
 		"name": doc.name,
 		"message": _("Draft saved."),
 		"grade": doc.grade or "",
+		"rating": stored_f,
 		"course_report": doc.course_report or "",
 	}
 

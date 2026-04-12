@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import add_months, cint, date_diff, format_datetime, getdate, now_datetime, today
+from frappe.utils import add_months, cint, date_diff, flt, format_datetime, getdate, now_datetime, today
 from datetime import date
 
 
@@ -219,6 +219,108 @@ def _course_attended_feedback_stats():
 		return {"total": total, "with_feedback": with_feedback}
 	except Exception:
 		return {"total": None, "with_feedback": None}
+
+
+def _nomination_feedback_rating_analysis(nomination_name: str):
+	"""
+	Submitted Feedback rows (with rating) for Course Attended records tied to a Course Nomination.
+	Rating is stored 0–1; response includes averages and star distribution (1–5).
+	"""
+	if not _can_read("Course Nomination") or not _can_read("Feedback") or not _can_read("Course Attended"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	nomination_name = (nomination_name or "").strip()
+	if not nomination_name:
+		frappe.throw(_("Course Nomination is required."))
+	if not frappe.db.exists("Course Nomination", nomination_name):
+		frappe.throw(_("Course Nomination not found."))
+
+	nom_row = frappe.db.get_value(
+		"Course Nomination",
+		nomination_name,
+		["course_name", "start_date", "end_date", "docstatus"],
+		as_dict=True,
+	)
+	if not nom_row:
+		frappe.throw(_("Course Nomination not found."))
+
+	attendees_count = frappe.db.count(
+		"Course Attended",
+		{"course_reference": nomination_name, "docstatus": 1},
+	)
+
+	rows = frappe.db.sql(
+		"""
+		SELECT f.name, f.personnel_name, f.rating
+		FROM `tabFeedback` f
+		INNER JOIN `tabCourse Attended` ca ON ca.name = f.course_reference
+		WHERE ca.course_reference = %(nom)s
+			AND ca.docstatus = 1
+			AND f.docstatus = 1
+			AND IFNULL(f.rating, 0) > 0
+		ORDER BY f.modified DESC
+		""",
+		{"nom": nomination_name},
+		as_dict=True,
+	)
+
+	ratings = [flt(r.get("rating")) for r in rows if r.get("rating") is not None and flt(r.get("rating")) > 0]
+	n_rated = len(ratings)
+	avg_01 = (sum(ratings) / n_rated) if n_rated else None
+	avg_5 = (avg_01 * 5) if avg_01 is not None else None
+
+	distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+	for r in ratings:
+		star = int(round(min(5, max(1, r * 5))))
+		distribution[star] = distribution.get(star, 0) + 1
+
+	(total_fb_submitted,) = frappe.db.sql(
+		"""
+		SELECT COUNT(*)
+		FROM `tabFeedback` f
+		INNER JOIN `tabCourse Attended` ca ON ca.name = f.course_reference
+		WHERE ca.course_reference = %(nom)s
+			AND ca.docstatus = 1
+			AND f.docstatus = 1
+		""",
+		{"nom": nomination_name},
+	)
+
+	sample = []
+	for r in rows[:30]:
+		rv = flt(r.get("rating") or 0)
+		if rv <= 0:
+			continue
+		star = int(round(min(5, max(1, rv * 5))))
+		sample.append(
+			{
+				"name": r.get("name"),
+				"personnel_name": r.get("personnel_name") or "",
+				"rating": round(rv, 3),
+				"stars": star,
+			}
+		)
+
+	return {
+		"nomination": nomination_name,
+		"course_name": nom_row.get("course_name") or "",
+		"start_date": str(nom_row.get("start_date") or ""),
+		"end_date": str(nom_row.get("end_date") or ""),
+		"nomination_docstatus": nom_row.get("docstatus"),
+		"attendees_count": cint(attendees_count),
+		"feedback_submitted_count": cint(total_fb_submitted or 0),
+		"responses_with_rating": n_rated,
+		"average_rating": round(flt(avg_01), 4) if avg_01 is not None else None,
+		"average_out_of_5": round(flt(avg_5), 2) if avg_5 is not None else None,
+		"distribution": distribution,
+		"sample": sample,
+	}
+
+
+@frappe.whitelist()
+def get_nomination_feedback_rating_analysis(course_nomination_name):
+	"""TRG dashboard: rating analysis for a chosen Course Nomination."""
+	return _nomination_feedback_rating_analysis(course_nomination_name)
 
 
 @frappe.whitelist()

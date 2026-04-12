@@ -13,6 +13,7 @@ frappe.pages["trg-dashboard"].on_page_load = function (wrapper) {
 	var pendingState = { start: 0, pageLength: 15, total: 0 };
 	var activityNomState = { start: 0, pageLength: 5, total: 0 };
 	var activityFbState = { start: 0, pageLength: 5, total: 0 };
+	var trgNomControl = null;
 
 	page.add_inner_message(`
 		<style>
@@ -383,6 +384,47 @@ frappe.pages["trg-dashboard"].on_page_load = function (wrapper) {
 			}
 			.trg-err { color: #ff6b6b; }
 			.trg-dash .trg-muted { color: var(--trg-muted); font-size: 0.82rem; }
+			.trg-fb-analysis { grid-column: 1 / -1; }
+			.trg-fb-analysis-picker {
+				display: flex;
+				flex-wrap: wrap;
+				align-items: flex-end;
+				gap: 12px;
+				margin-bottom: 12px;
+			}
+			.trg-fb-nom-field { flex: 1; min-width: 240px; max-width: 440px; }
+			.trg-fb-analysis-picker .trg-link-btn { flex-shrink: 0; }
+			.trg-fb-analysis-meta {
+				font-size: 0.8rem;
+				color: var(--trg-muted);
+				line-height: 1.5;
+				margin-bottom: 14px;
+			}
+			.trg-fb-stat-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+				gap: 12px;
+				margin-top: 4px;
+			}
+			.trg-fb-stat {
+				background: var(--trg-panel2);
+				border-radius: 10px;
+				padding: 12px 14px;
+				border: 1px solid rgba(255, 255, 255, 0.06);
+			}
+			.trg-fb-stat-val {
+				font-family: "Orbitron", sans-serif;
+				font-size: 1.35rem;
+				color: #ffe600;
+				filter: drop-shadow(0 0 8px rgba(255, 230, 0, 0.25));
+			}
+			.trg-fb-stat-lbl {
+				font-size: 0.65rem;
+				color: var(--trg-muted);
+				margin-top: 6px;
+				text-transform: uppercase;
+				letter-spacing: 0.06em;
+			}
 		</style>
 	`);
 
@@ -843,6 +885,174 @@ frappe.pages["trg-dashboard"].on_page_load = function (wrapper) {
 			"</div>";
 	}
 
+	function mountNominationPicker() {
+		var wrap = document.getElementById("trg-fb-nom-wrap");
+		if (!wrap) return;
+		$(wrap).empty();
+		trgNomControl = frappe.ui.form.make_control({
+			df: {
+				fieldtype: "Link",
+				options: "Course Nomination",
+				fieldname: "trg_fb_nom",
+				label: __("Course nomination"),
+				placeholder: __("Search by name or ID…"),
+			},
+			parent: $(wrap),
+			render_input: true,
+		});
+		trgNomControl.refresh();
+	}
+
+	function runFeedbackAnalysis() {
+		var body = document.getElementById("trg-fb-analysis-body");
+		if (!trgNomControl || typeof trgNomControl.get_value !== "function") {
+			if (body)
+				body.innerHTML =
+					'<p class="trg-muted">' + escapeHtml(__("Picker not ready. Refresh the page.")) + "</p>";
+			return;
+		}
+		var nom = String(trgNomControl.get_value() || "").trim();
+		if (!nom) {
+			frappe.msgprint({
+				title: __("Missing"),
+				message: __("Please select a course nomination."),
+				indicator: "orange",
+			});
+			return;
+		}
+		if (body)
+			body.innerHTML =
+				'<p class="trg-muted"><i class="fa fa-spinner fa-spin"></i> ' +
+				escapeHtml(__("Loading…")) +
+				"</p>";
+		frappe.call({
+			method:
+				"dat_pm.nacstnew.page.trg_dashboard.trg_dashboard.get_nomination_feedback_rating_analysis",
+			args: { course_nomination_name: nom },
+			callback: function (r) {
+				if (r.exc) {
+					if (body)
+						body.innerHTML =
+							'<p class="trg-muted">' + escapeHtml(__("Could not load analysis.")) + "</p>";
+					return;
+				}
+				renderFeedbackAnalysis(r.message, body);
+			},
+			error: function () {
+				if (body)
+					body.innerHTML =
+						'<p class="trg-muted">' + escapeHtml(__("Could not load analysis.")) + "</p>";
+			},
+		});
+	}
+
+	function renderFeedbackAnalysis(data, bodyEl) {
+		var body = bodyEl || document.getElementById("trg-fb-analysis-body");
+		if (!body) return;
+		if (!data || !data.nomination) {
+			body.innerHTML = '<p class="trg-muted">' + escapeHtml(__("No data.")) + "</p>";
+			return;
+		}
+		var dist = data.distribution || {};
+		var counts = [1, 2, 3, 4, 5].map(function (s) {
+			return dist[s] || 0;
+		});
+		var maxD = Math.max.apply(null, [1].concat(counts));
+		var bars = [1, 2, 3, 4, 5]
+			.map(function (star) {
+				var c = dist[star] || 0;
+				var pct = Math.round((100 * c) / maxD);
+				var col = ACCENTS[(star - 1) % ACCENTS.length];
+				return (
+					'<div class="trg-cat-row"><div class="trg-cat-hdr"><span>' +
+					escapeHtml(String(star) + " " + __("stars")) +
+					'</span><span>' +
+					fmtNum(c) +
+					'</span></div><div class="trg-bar-track"><div class="trg-bar-fill" style="width:' +
+					pct +
+					"%;background:" +
+					col +
+					";color:" +
+					col +
+					'"></div></div></div>'
+				);
+			})
+			.join("");
+
+		var avg5 =
+			data.average_out_of_5 != null && data.average_out_of_5 !== ""
+				? String(data.average_out_of_5)
+				: "—";
+		var stats =
+			'<div class="trg-fb-stat-grid">' +
+			'<div class="trg-fb-stat"><div class="trg-fb-stat-val">' +
+			escapeHtml(avg5) +
+			'</div><div class="trg-fb-stat-lbl">' +
+			escapeHtml(__("Avg / 5")) +
+			"</div></div>" +
+			'<div class="trg-fb-stat"><div class="trg-fb-stat-val">' +
+			fmtNum(data.responses_with_rating) +
+			'</div><div class="trg-fb-stat-lbl">' +
+			escapeHtml(__("With rating")) +
+			"</div></div>" +
+			'<div class="trg-fb-stat"><div class="trg-fb-stat-val">' +
+			fmtNum(data.feedback_submitted_count) +
+			'</div><div class="trg-fb-stat-lbl">' +
+			escapeHtml(__("Feedback submitted")) +
+			"</div></div>" +
+			'<div class="trg-fb-stat"><div class="trg-fb-stat-val">' +
+			fmtNum(data.attendees_count) +
+			'</div><div class="trg-fb-stat-lbl">' +
+			escapeHtml(__("Nominated (attendance)")) +
+			"</div></div>" +
+			"</div>";
+
+		var ds = data.nomination_docstatus;
+		var meta =
+			'<div class="trg-fb-analysis-meta"><strong style="color:#e8ecff">' +
+			escapeHtml(data.course_name || data.nomination || "") +
+			"</strong> · " +
+			escapeHtml(data.nomination || "") +
+			"<br/>" +
+			escapeHtml(data.start_date || "") +
+			" — " +
+			escapeHtml(data.end_date || "") +
+			" " +
+			docstatusPill(ds) +
+			"</div>";
+
+		var sample = data.sample || [];
+		var listU = sample
+			.map(function (s) {
+				return (
+					'<li><a href="#" class="trg-doc-link" data-doctype="Feedback" data-name="' +
+					escapeHtml(s.name) +
+					'">' +
+					escapeHtml(s.personnel_name || s.name) +
+					'</a><span class="trg-pill" style="color:#ffe600">' +
+					escapeHtml(String(s.stars)) +
+					" " +
+					escapeHtml(__("stars")) +
+					"</span></li>"
+				);
+			})
+			.join("");
+
+		body.innerHTML =
+			meta +
+			stats +
+			'<div style="margin-top:14px"><div class="trg-activity-subtitle">' +
+			escapeHtml(__("Rating distribution")) +
+			"</div>" +
+			bars +
+			'</div><div style="margin-top:14px"><div class="trg-activity-subtitle">' +
+			escapeHtml(__("Responses")) +
+			'</div><ul class="trg-list" style="max-height:180px;overflow-y:auto">' +
+			(listU ||
+				'<li class="trg-muted">' + escapeHtml(__("None with ratings yet")) + "</li>") +
+			"</ul></div>";
+	}
+
 	function buildDashboard(data) {
 		var c = data.counts || {};
 		var kpis = [
@@ -960,6 +1170,20 @@ frappe.pages["trg-dashboard"].on_page_load = function (wrapper) {
 			'<div class="trg-kpi-row">' +
 			kpiHtml +
 			"</div>" +
+			'<div class="trg-card trg-fb-analysis">' +
+			'<div class="trg-card-header"><span class="trg-card-title">' +
+			__("Course feedback analysis") +
+			'</span><span class="trg-chip">' +
+			__("Ratings") +
+			'</span></div>' +
+			'<div class="trg-fb-analysis-picker">' +
+			'<div class="trg-fb-nom-field" id="trg-fb-nom-wrap"></div>' +
+			'<button type="button" class="trg-link-btn" id="trg-fb-analysis-btn">' +
+			escapeHtml(__("Load analysis")) +
+			"</button></div>" +
+			'<div id="trg-fb-analysis-body" class="trg-muted">' +
+			escapeHtml(__("Choose a course nomination, then load analysis.")) +
+			"</div></div>" +
 			'<div class="trg-card trg-activity">' +
 			'<div class="trg-card-header"><span class="trg-card-title">' +
 			__("Activity & pipeline") +
@@ -1055,6 +1279,8 @@ frappe.pages["trg-dashboard"].on_page_load = function (wrapper) {
 		if (!bento) return;
 		bento.innerHTML = html;
 
+		mountNominationPicker();
+
 		if (data.activity_nominations)
 			activityNomState.pageLength =
 				data.activity_nominations.page_length || activityNomState.pageLength;
@@ -1082,6 +1308,11 @@ frappe.pages["trg-dashboard"].on_page_load = function (wrapper) {
 					return;
 				}
 				var actBtn = e.target.closest("button");
+				if (actBtn && actBtn.id === "trg-fb-analysis-btn") {
+					e.preventDefault();
+					runFeedbackAnalysis();
+					return;
+				}
 				if (actBtn && actBtn.id === "trg-activity-nom-prev") {
 					e.preventDefault();
 					var np = activityNomState.start - activityNomState.pageLength;
