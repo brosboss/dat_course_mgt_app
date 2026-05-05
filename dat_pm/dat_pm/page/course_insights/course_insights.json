@@ -1,0 +1,23 @@
+{
+ "content": null,
+ "creation": "2026-05-05 19:53:37.799681",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-05-05 19:53:37.799681",
+ "modified_by": "Administrator",
+ "module": "Dat Pm",
+ "name": "course-insights",
+ "owner": "Administrator",
+ "page_name": "course-insights",
+ "roles": [
+  {
+   "role": "Course Insights Manager"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 1,
+ "title": "Course Insights"
+}

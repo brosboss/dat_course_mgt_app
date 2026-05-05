@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import get_table_name, getdate, today
+from frappe.utils import cint, get_table_name, getdate, today
 
 
 def _docstatus_label(ds):
@@ -109,6 +109,22 @@ def get_personnel_course_qualification_remark(service_number, course_name):
 	return _get_personnel_course_qualification_detail(service_number, course_name)
 
 
+def _personnel_candidate_is_due(service_number, course_name, prerequisite_courses):
+	"""True if this service number has not attended course_name and has completed all prerequisite courses (submitted)."""
+	if frappe.db.exists(
+		"Course Attended",
+		{"service_number": service_number, "course_name": course_name, "docstatus": 1},
+	):
+		return False
+	for prereq in prerequisite_courses:
+		if not frappe.db.exists(
+			"Course Attended",
+			{"service_number": service_number, "course_name": prereq, "docstatus": 1},
+		):
+			return False
+	return True
+
+
 @frappe.whitelist()
 def get_personnel_due_for_course(course_name):
 	"""
@@ -129,36 +145,17 @@ def get_personnel_due_for_course(course_name):
 	if not qualified_ranks:
 		return []
 
-	# All personnel whose rank is qualified for this course
+	# All personnel whose rank is qualified for this course (stable order for pagination elsewhere)
 	personnel_list = frappe.get_all(
 		"Personnel",
 		filters={"current_rank": ["in", qualified_ranks]},
 		fields=["service_number", "personnel_name", "current_rank", "current_unit"],
+		order_by="service_number asc",
 	)
 
 	result = []
 	for p in personnel_list:
-		service_number = p.service_number
-		# Must not have taken this course (submitted Course Attended)
-		has_taken_this = frappe.db.exists(
-			"Course Attended",
-			{"service_number": service_number, "course_name": course_name, "docstatus": 1},
-		)
-		if has_taken_this:
-			continue
-
-		# Must have taken all mandatory prerequisite courses
-		all_prereqs_done = True
-		for prereq in prerequisite_courses:
-			has_taken_prereq = frappe.db.exists(
-				"Course Attended",
-				{"service_number": service_number, "course_name": prereq, "docstatus": 1},
-			)
-			if not has_taken_prereq:
-				all_prereqs_done = False
-				break
-
-		if not all_prereqs_done:
+		if not _personnel_candidate_is_due(p.service_number, course_name, prerequisite_courses):
 			continue
 
 		result.append({
@@ -169,6 +166,168 @@ def get_personnel_due_for_course(course_name):
 		})
 
 	return result
+
+
+def _course_insights_attendance_stats(course_name):
+	"""Aggregates for Course Insights summary without loading every Course Attended row."""
+	distinct_row = frappe.db.sql(
+		"""
+		SELECT COUNT(DISTINCT service_number)
+		FROM `tabCourse Attended`
+		WHERE course_name = %(course)s AND docstatus = 1
+		""",
+		{"course": course_name},
+	)
+	distinct_attendees = int(distinct_row[0][0]) if distinct_row else 0
+
+	records_count = frappe.db.count("Course Attended", {"course_name": course_name, "docstatus": 1})
+
+	status_breakdown = {}
+	status_rows = frappe.db.sql(
+		"""
+		SELECT IFNULL(course_status, ''), COUNT(*)
+		FROM `tabCourse Attended`
+		WHERE course_name = %(course)s AND docstatus = 1
+		GROUP BY IFNULL(course_status, '')
+		""",
+		{"course": course_name},
+	)
+	not_set = str(frappe._("Not set"))
+	for st, cnt in status_rows or []:
+		key = (st or "").strip() or not_set
+		status_breakdown[key] = int(cnt)
+
+	return distinct_attendees, records_count, status_breakdown
+
+
+def _count_personnel_due_for_course(course_name, qualified_ranks, prerequisite_courses):
+	if not qualified_ranks:
+		return 0
+	personnel_list = frappe.get_all(
+		"Personnel",
+		filters={"current_rank": ["in", qualified_ranks]},
+		pluck="service_number",
+		order_by="service_number asc",
+	)
+	n = 0
+	for service_number in personnel_list:
+		if _personnel_candidate_is_due(service_number, course_name, prerequisite_courses):
+			n += 1
+	return n
+
+
+@frappe.whitelist()
+def get_course_insights_data(course_name):
+	"""
+	Return course reference data and attendance / due statistics for Course Insights.
+	Does not load attendee or due lists (use paginated methods for those).
+	"""
+	if not course_name:
+		frappe.throw(frappe._("Course Name is required."))
+	if not frappe.db.exists("Course Name", course_name):
+		frappe.throw(frappe._("Course '{0}' does not exist.").format(course_name))
+
+	course_doc = frappe.get_doc("Course Name", course_name)
+	qualified_ranks = [row.rank for row in (course_doc.qualified_rank or []) if row.rank]
+	prerequisites = [row.course_name for row in (course_doc.mandatory_prerequisite_course or []) if row.course_name]
+
+	distinct_attendees, records_count, status_breakdown = _course_insights_attendance_stats(course_name)
+	due_count = _count_personnel_due_for_course(course_name, qualified_ranks, prerequisites)
+
+	return {
+		"course": {
+			"name": course_name,
+			"course_abbreviation": course_doc.course_abbreviation or "",
+			"course_frequency": course_doc.course_frequency or "",
+			"qualified_ranks": qualified_ranks,
+			"prerequisites": prerequisites,
+		},
+		"stats": {
+			"personnel_attended_count": distinct_attendees,
+			"course_attended_records_count": records_count,
+			"personnel_due_count": due_count,
+			"qualified_rank_count": len(qualified_ranks),
+			"prerequisite_count": len(prerequisites),
+			"status_breakdown": status_breakdown,
+		},
+	}
+
+
+@frappe.whitelist()
+def get_course_insights_attended_page(course_name, limit_start=0, limit_page_length=50):
+	"""Paginated submitted Course Attended rows for a course (newest by end date first)."""
+	if not course_name:
+		frappe.throw(frappe._("Course Name is required."))
+	if not frappe.db.exists("Course Name", course_name):
+		frappe.throw(frappe._("Course '{0}' does not exist.").format(course_name))
+
+	limit_start = max(0, cint(limit_start))
+	limit_page_length = cint(limit_page_length) or 50
+	limit_page_length = max(1, min(limit_page_length, 200))
+
+	filters = {"course_name": course_name, "docstatus": 1}
+	total = frappe.db.count("Course Attended", filters=filters)
+	rows = frappe.get_all(
+		"Course Attended",
+		filters=filters,
+		fields=[
+			"name",
+			"service_number",
+			"personnel_name",
+			"course_start_date",
+			"course_end_date",
+			"grade",
+			"course_status",
+			"course_reference",
+		],
+		order_by="course_end_date desc, modified desc",
+		limit_start=limit_start,
+		limit_page_length=limit_page_length,
+	)
+	return {"total": total, "limit_start": limit_start, "limit_page_length": limit_page_length, "data": rows}
+
+
+@frappe.whitelist()
+def get_course_insights_due_page(course_name, limit_start=0, limit_page_length=50):
+	"""Paginated personnel due for the course (same rules as get_personnel_due_for_course), ordered by service number."""
+	if not course_name:
+		frappe.throw(frappe._("Course Name is required."))
+	if not frappe.db.exists("Course Name", course_name):
+		frappe.throw(frappe._("Course '{0}' does not exist.").format(course_name))
+
+	limit_start = max(0, cint(limit_start))
+	limit_page_length = cint(limit_page_length) or 50
+	limit_page_length = max(1, min(limit_page_length, 200))
+
+	course_doc = frappe.get_doc("Course Name", course_name)
+	qualified_ranks = [row.rank for row in (course_doc.qualified_rank or []) if row.rank]
+	prerequisite_courses = [row.course_name for row in (course_doc.mandatory_prerequisite_course or []) if row.course_name]
+
+	if not qualified_ranks:
+		return {"total": 0, "limit_start": limit_start, "limit_page_length": limit_page_length, "data": []}
+
+	personnel_list = frappe.get_all(
+		"Personnel",
+		filters={"current_rank": ["in", qualified_ranks]},
+		fields=["service_number", "personnel_name", "current_rank", "current_unit"],
+		order_by="service_number asc",
+	)
+
+	rows = []
+	match_idx = 0
+	for p in personnel_list:
+		if not _personnel_candidate_is_due(p.service_number, course_name, prerequisite_courses):
+			continue
+		if match_idx >= limit_start and len(rows) < limit_page_length:
+			rows.append({
+				"service_number": p.service_number,
+				"personnel_name": p.personnel_name or "",
+				"current_rank": p.current_rank or "",
+				"current_unit": p.current_unit or "",
+			})
+		match_idx += 1
+
+	return {"total": match_idx, "limit_start": limit_start, "limit_page_length": limit_page_length, "data": rows}
 
 
 @frappe.whitelist()
