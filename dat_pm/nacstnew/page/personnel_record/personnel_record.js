@@ -1216,6 +1216,7 @@ function display_courses_attended(courses) {
 	console.log("Building courses table with", courses.length, "records");
 	let html = '<table class="pr-posting-table-compact">';
 	html += '<thead><tr>';
+	html += '<th>Source</th>';
 	html += '<th>Course Name</th>';
 	html += '<th>Start Date</th>';
 	html += '<th>End Date</th>';
@@ -1226,13 +1227,23 @@ function display_courses_attended(courses) {
 	courses.forEach(function(record) {
 		console.log("Processing course record:", record);
 		let reportLink = '';
-		if (record.course_report) {
+		if (record.record_doctype === 'Legacy Course Record' && record.name) {
+			reportLink =
+				'<a href="#Form/Legacy Course Record/' +
+				frappe.utils.escape_html(record.name) +
+				'">Legacy record</a>';
+		} else if (record.course_report) {
 			reportLink = '<a href="' + frappe.utils.escape_html(record.course_report) + '" target="_blank">View Report</a>';
 		} else {
 			reportLink = 'N/A';
 		}
+		let sourceLabel =
+			record.record_doctype === 'Legacy Course Record'
+				? 'Legacy'
+				: 'Course run';
 		
 		html += '<tr>';
+		html += '<td>' + frappe.utils.escape_html(sourceLabel) + '</td>';
 		html += '<td>' + frappe.utils.escape_html(record.course_name || '') + '</td>';
 		html += '<td>' + (record.course_start_date || '') + '</td>';
 		html += '<td>' + (record.course_end_date || '') + '</td>';

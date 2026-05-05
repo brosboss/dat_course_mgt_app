@@ -70,23 +70,17 @@ def _get_personnel_course_qualification_detail(service_number, course_name):
 			).format(personnel_rank or frappe._("Unknown")),
 		}
 
-	has_taken_this = frappe.db.exists(
-		"Course Attended",
-		{"service_number": service_number, "course_name": course_name, "docstatus": 1},
-	)
-	if has_taken_this:
+	if _personnel_has_course_completion(service_number, course_name):
 		return {
 			"qualified": 0,
-			"remark": frappe._("Not qualified: personnel has already attended this course."),
+			"remark": frappe._(
+				"Not qualified: personnel has already completed this course (system record or legacy import)."
+			),
 		}
 
 	missing_prereqs = []
 	for prereq in prerequisite_courses:
-		has_taken_prereq = frappe.db.exists(
-			"Course Attended",
-			{"service_number": service_number, "course_name": prereq, "docstatus": 1},
-		)
-		if not has_taken_prereq:
+		if not _personnel_has_course_completion(service_number, prereq):
 			missing_prereqs.append(prereq)
 
 	if missing_prereqs:
@@ -109,18 +103,29 @@ def get_personnel_course_qualification_remark(service_number, course_name):
 	return _get_personnel_course_qualification_detail(service_number, course_name)
 
 
-def _personnel_candidate_is_due(service_number, course_name, prerequisite_courses):
-	"""True if this service number has not attended course_name and has completed all prerequisite courses (submitted)."""
+def _personnel_has_course_completion(service_number, course_name):
+	"""True if personnel completed the course via submitted Course Attended or a Legacy Course Record row."""
+	if not service_number or not course_name:
+		return False
 	if frappe.db.exists(
 		"Course Attended",
 		{"service_number": service_number, "course_name": course_name, "docstatus": 1},
 	):
+		return True
+	return bool(
+		frappe.db.exists(
+			"Legacy Course Record",
+			{"personnel": service_number, "course_name": course_name},
+		)
+	)
+
+
+def _personnel_candidate_is_due(service_number, course_name, prerequisite_courses):
+	"""True if not already completed (Course Attended or legacy) and all prerequisites are completed the same way."""
+	if _personnel_has_course_completion(service_number, course_name):
 		return False
 	for prereq in prerequisite_courses:
-		if not frappe.db.exists(
-			"Course Attended",
-			{"service_number": service_number, "course_name": prereq, "docstatus": 1},
-		):
+		if not _personnel_has_course_completion(service_number, prereq):
 			return False
 	return True
 
@@ -132,8 +137,8 @@ def get_personnel_due_for_course(course_name):
 
 	Criteria:
 	1. Personnel's current_rank must be in the course's Qualified Rank list.
-	2. Personnel must not have already taken this course (no submitted Course Attended).
-	3. Personnel must have taken all Mandatory Prerequisite Courses (submitted Course Attended for each).
+	2. Personnel must not have already completed this course (no submitted Course Attended or Legacy Course Record).
+	3. Personnel must have completed all Mandatory Prerequisite Courses (Course Attended or Legacy Course Record for each).
 	"""
 	if not course_name or not frappe.db.exists("Course Name", course_name):
 		return []
@@ -169,18 +174,23 @@ def get_personnel_due_for_course(course_name):
 
 
 def _course_insights_attendance_stats(course_name):
-	"""Aggregates for Course Insights summary without loading every Course Attended row."""
+	"""Aggregates for Course Insights: Course Attended + Legacy Course Record (distinct people, counts, status mix)."""
 	distinct_row = frappe.db.sql(
 		"""
-		SELECT COUNT(DISTINCT service_number)
-		FROM `tabCourse Attended`
-		WHERE course_name = %(course)s AND docstatus = 1
+		SELECT COUNT(*) FROM (
+			SELECT service_number AS sn FROM `tabCourse Attended`
+			WHERE course_name = %(course)s AND docstatus = 1
+			UNION
+			SELECT personnel AS sn FROM `tabLegacy Course Record`
+			WHERE course_name = %(course)s AND IFNULL(personnel, '') != ''
+		) t
 		""",
 		{"course": course_name},
 	)
 	distinct_attendees = int(distinct_row[0][0]) if distinct_row else 0
 
 	records_count = frappe.db.count("Course Attended", {"course_name": course_name, "docstatus": 1})
+	legacy_records_count = frappe.db.count("Legacy Course Record", {"course_name": course_name})
 
 	status_breakdown = {}
 	status_rows = frappe.db.sql(
@@ -197,7 +207,10 @@ def _course_insights_attendance_stats(course_name):
 		key = (st or "").strip() or not_set
 		status_breakdown[key] = int(cnt)
 
-	return distinct_attendees, records_count, status_breakdown
+	legacy_key = str(frappe._("Legacy (import)"))
+	status_breakdown[legacy_key] = int(legacy_records_count)
+
+	return distinct_attendees, records_count, legacy_records_count, status_breakdown
 
 
 def _count_personnel_due_for_course(course_name, qualified_ranks, prerequisite_courses):
@@ -231,7 +244,9 @@ def get_course_insights_data(course_name):
 	qualified_ranks = [row.rank for row in (course_doc.qualified_rank or []) if row.rank]
 	prerequisites = [row.course_name for row in (course_doc.mandatory_prerequisite_course or []) if row.course_name]
 
-	distinct_attendees, records_count, status_breakdown = _course_insights_attendance_stats(course_name)
+	distinct_attendees, records_count, legacy_records_count, status_breakdown = _course_insights_attendance_stats(
+		course_name
+	)
 	due_count = _count_personnel_due_for_course(course_name, qualified_ranks, prerequisites)
 
 	return {
@@ -245,6 +260,7 @@ def get_course_insights_data(course_name):
 		"stats": {
 			"personnel_attended_count": distinct_attendees,
 			"course_attended_records_count": records_count,
+			"legacy_course_records_count": legacy_records_count,
 			"personnel_due_count": due_count,
 			"qualified_rank_count": len(qualified_ranks),
 			"prerequisite_count": len(prerequisites),
@@ -255,7 +271,7 @@ def get_course_insights_data(course_name):
 
 @frappe.whitelist()
 def get_course_insights_attended_page(course_name, limit_start=0, limit_page_length=50):
-	"""Paginated submitted Course Attended rows for a course (newest by end date first)."""
+	"""Paginated completion rows: submitted Course Attended + Legacy Course Record (newest activity first)."""
 	if not course_name:
 		frappe.throw(frappe._("Course Name is required."))
 	if not frappe.db.exists("Course Name", course_name):
@@ -265,25 +281,67 @@ def get_course_insights_attended_page(course_name, limit_start=0, limit_page_len
 	limit_page_length = cint(limit_page_length) or 50
 	limit_page_length = max(1, min(limit_page_length, 200))
 
-	filters = {"course_name": course_name, "docstatus": 1}
-	total = frappe.db.count("Course Attended", filters=filters)
-	rows = frappe.get_all(
-		"Course Attended",
-		filters=filters,
-		fields=[
-			"name",
-			"service_number",
-			"personnel_name",
-			"course_start_date",
-			"course_end_date",
-			"grade",
-			"course_status",
-			"course_reference",
-		],
-		order_by="course_end_date desc, modified desc",
-		limit_start=limit_start,
-		limit_page_length=limit_page_length,
+	total_row = frappe.db.sql(
+		"""
+		SELECT COUNT(*) FROM (
+			SELECT name FROM `tabCourse Attended`
+			WHERE course_name = %(c)s AND docstatus = 1
+			UNION ALL
+			SELECT name FROM `tabLegacy Course Record`
+			WHERE course_name = %(c)s
+		) x
+		""",
+		{"c": course_name},
 	)
+	total = int(total_row[0][0]) if total_row else 0
+
+	rows = frappe.db.sql(
+		"""
+		SELECT * FROM (
+			SELECT
+				'course_attended' AS record_source,
+				ca.name,
+				ca.service_number,
+				ca.personnel_name,
+				ca.course_start_date,
+				ca.course_end_date,
+				ca.grade,
+				ca.course_status,
+				ca.course_reference
+			FROM `tabCourse Attended` ca
+			WHERE ca.course_name = %(c)s AND ca.docstatus = 1
+			UNION ALL
+			SELECT
+				'legacy' AS record_source,
+				lr.name,
+				lr.personnel AS service_number,
+				lr.personnel_name,
+				lr.start_date AS course_start_date,
+				lr.end_date AS course_end_date,
+				lr.grade,
+				NULL AS course_status,
+				NULL AS course_reference
+			FROM `tabLegacy Course Record` lr
+			WHERE lr.course_name = %(c)s
+		) u
+		ORDER BY COALESCE(u.course_end_date, u.course_start_date, '1970-01-01') DESC, u.name DESC
+		LIMIT %(limit)s OFFSET %(offset)s
+		""",
+		{"c": course_name, "limit": limit_page_length, "offset": limit_start},
+		as_dict=True,
+	)
+
+	legacy_status_label = str(frappe._("Legacy (import)"))
+	for r in rows:
+		src = (r.get("record_source") or "").strip()
+		if src == "legacy":
+			r["record_doctype"] = "Legacy Course Record"
+			if not r.get("course_status"):
+				r["course_status"] = legacy_status_label
+		else:
+			r["record_doctype"] = "Course Attended"
+		r.pop("record_source", None)
+
 	return {"total": total, "limit_start": limit_start, "limit_page_length": limit_page_length, "data": rows}
 
 
@@ -397,15 +455,46 @@ def get_other_nomination_rows_for_same_course(course_name, exclude_nomination_na
 
 @frappe.whitelist()
 def get_courses_attended_for_personnel(service_number):
-	"""Return list of courses the personnel has attended (submitted Course Attended)."""
+	"""Return courses attended (submitted Course Attended) plus Legacy Course Record rows, merged by date."""
+	from dat_pm.nacstnew.doctype.personnel.personnel import _course_history_sort_date
+
 	if not service_number:
 		return []
-	return frappe.get_all(
+	attended = frappe.get_all(
 		"Course Attended",
 		filters={"service_number": service_number, "docstatus": 1},
 		fields=["name", "course_name", "course_start_date", "course_end_date", "grade", "specialty"],
 		order_by="course_end_date desc",
 	)
+	for row in attended:
+		row["record_doctype"] = "Course Attended"
+
+	legacy = frappe.get_all(
+		"Legacy Course Record",
+		filters={"personnel": service_number},
+		fields=["name", "course_name", "start_date", "end_date", "grade"],
+		order_by="end_date desc, start_date desc",
+	)
+	legacy_rows = []
+	for row in legacy:
+		legacy_rows.append(
+			{
+				"name": row.name,
+				"course_name": row.course_name,
+				"course_start_date": row.start_date,
+				"course_end_date": row.end_date,
+				"grade": row.grade,
+				"specialty": None,
+				"record_doctype": "Legacy Course Record",
+			}
+		)
+
+	combined = list(attended) + legacy_rows
+	combined.sort(
+		key=lambda r: _course_history_sort_date(r.get("course_end_date"), r.get("course_start_date")),
+		reverse=True,
+	)
+	return combined
 
 
 @frappe.whitelist()

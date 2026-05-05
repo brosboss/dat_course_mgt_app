@@ -244,7 +244,15 @@ frappe.pages["personnel-course-det"].on_page_load = function (wrapper) {
 		wrap.style.display = "block";
 
 		var rows = list.map(function (row, idx) {
-			var docLink = "<a class=\"pcd-link\" href=\"#Form/Course Attended/" + esc(row.name) + "\">" + esc(row.course_name) + "</a>";
+			var doctype = row.record_doctype || "Course Attended";
+			var docLink =
+				"<a class=\"pcd-link\" href=\"#Form/" +
+				esc(doctype) +
+				"/" +
+				esc(row.name) +
+				"\">" +
+				esc(row.course_name) +
+				"</a>";
 			return (
 				"<tr>" +
 				"<td style=\"width: 36px; text-align: center;\">" + (idx + 1) + "</td>" +

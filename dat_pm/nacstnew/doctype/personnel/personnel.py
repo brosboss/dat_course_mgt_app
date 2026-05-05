@@ -254,19 +254,37 @@ def get_personnel_mission_html(service_number):
 	
 	return html
 
+
+def _course_history_sort_date(end_d, start_d):
+	"""Sort key (latest first) when merging Course Attended and Legacy Course Record."""
+	from datetime import date
+
+	from frappe.utils import getdate
+
+	d = end_d or start_d
+	if not d:
+		return date(1900, 1, 1)
+	if isinstance(d, str):
+		try:
+			return getdate(d)
+		except Exception:
+			return date(1900, 1, 1)
+	return d
+
+
 @frappe.whitelist()
 def get_courses_attended_html(service_number):
-	"""Generate HTML table for courses attended from Course Attended doctype"""
+	"""Generate HTML for courses from Course Attended and Legacy Course Record (pre-system history)."""
+	from frappe.utils import get_url_to_form
+
 	if not service_number:
 		return "<p>No service number provided.</p>"
-	
-	# Query all Course Attended records for this service number
+
 	course_records = frappe.db.get_all(
 		"Course Attended",
-		filters={
-			"service_number": service_number
-		},
+		filters={"service_number": service_number},
 		fields=[
+			"name",
 			"course_name",
 			"course_start_date",
 			"course_end_date",
@@ -276,13 +294,38 @@ def get_courses_attended_html(service_number):
 			"course_status",
 			"feedback_collected",
 		],
-		order_by="course_start_date desc, creation desc"
+		order_by="course_start_date desc, creation desc",
 	)
-	
-	if not course_records:
+
+	legacy_records = frappe.db.get_all(
+		"Legacy Course Record",
+		filters={"personnel": service_number},
+		fields=["name", "course_name", "start_date", "end_date", "grade"],
+		order_by="end_date desc, start_date desc, creation desc",
+	)
+
+	rows = []
+	for record in course_records:
+		rows.append(
+			(
+				_course_history_sort_date(record.course_end_date, record.course_start_date),
+				"attended",
+				record,
+			)
+		)
+	for record in legacy_records:
+		rows.append(
+			(
+				_course_history_sort_date(record.end_date, record.start_date),
+				"legacy",
+				record,
+			)
+		)
+	rows.sort(key=lambda x: x[0], reverse=True)
+
+	if not rows:
 		return "<p>No courses attended found.</p>"
-	
-	# Generate HTML table
+
 	html = """
 	<style>
 		.courses-attended-table {
@@ -304,6 +347,9 @@ def get_courses_attended_html(service_number):
 		.courses-attended-table tr:nth-child(even) {
 			background-color: var(--fg-color);
 		}
+		.courses-attended-table tr.courses-attended-row-legacy td {
+			background-color: var(--control-bg, #f4f5f6);
+		}
 		.courses-attended-ok {
 			color: var(--green-600, #2e7d32);
 			font-weight: 500;
@@ -316,44 +362,81 @@ def get_courses_attended_html(service_number):
 	<table class="courses-attended-table">
 		<thead>
 			<tr>
-				<th>Course Name</th>
-				<th>Start Date</th>
-				<th>End Date</th>
-				<th>Grade</th>
-				<th>Course Status</th>
-				<th>Course Report</th>
-				<th>Feedback</th>
-				<th>Specialty</th>
+				<th>""" + frappe._("Source") + """</th>
+				<th>""" + frappe._("Course Name") + """</th>
+				<th>""" + frappe._("Start Date") + """</th>
+				<th>""" + frappe._("End Date") + """</th>
+				<th>""" + frappe._("Grade") + """</th>
+				<th>""" + frappe._("Course Status") + """</th>
+				<th>""" + frappe._("Course Report") + """</th>
+				<th>""" + frappe._("Feedback") + """</th>
+				<th>""" + frappe._("Specialty") + """</th>
 			</tr>
 		</thead>
 		<tbody>
 	"""
-	
-	for record in course_records:
-		# Format dates
-		start_date = frappe.format_value(record.course_start_date, {"fieldtype": "Date"}) if record.course_start_date else ""
-		end_date = frappe.format_value(record.course_end_date, {"fieldtype": "Date"}) if record.course_end_date else ""
 
-		course_status = frappe.utils.escape_html(record.course_status or "—")
-
-		# Course report: link when present; label whether it is filed (treated)
-		if record.course_report:
-			report_url = frappe.utils.escape_html(record.course_report)
-			course_report = (
-				f'<span class="courses-attended-ok">Provided</span> · '
-				f'<a href="{report_url}" target="_blank" rel="noopener noreferrer">View</a>'
+	for _sort_key, kind, record in rows:
+		if kind == "attended":
+			row_class = ""
+			url = get_url_to_form("Course Attended", record.name)
+			source_cell = (
+				f'<a href="{frappe.utils.escape_html(url)}">'
+				f'{frappe.utils.escape_html(frappe._("Course run"))}</a>'
 			)
+			start_date = (
+				frappe.format_value(record.course_start_date, {"fieldtype": "Date"})
+				if record.course_start_date
+				else ""
+			)
+			end_date = (
+				frappe.format_value(record.course_end_date, {"fieldtype": "Date"})
+				if record.course_end_date
+				else ""
+			)
+			course_status = frappe.utils.escape_html(record.course_status or "—")
+			if record.course_report:
+				report_url = frappe.utils.escape_html(record.course_report)
+				course_report = (
+					f'<span class="courses-attended-ok">{frappe.utils.escape_html(frappe._("Provided"))}</span> · '
+					f'<a href="{report_url}" target="_blank" rel="noopener noreferrer">'
+					f'{frappe.utils.escape_html(frappe._("View"))}</a>'
+				)
+			else:
+				course_report = (
+					f'<span class="courses-attended-missing">'
+					f'{frappe.utils.escape_html(frappe._("Not provided"))}</span>'
+				)
+			if record.feedback_collected:
+				feedback_cell = (
+					f'<span class="courses-attended-ok">'
+					f'{frappe.utils.escape_html(frappe._("Collected"))}</span>'
+				)
+			else:
+				feedback_cell = (
+					f'<span class="courses-attended-missing">'
+					f'{frappe.utils.escape_html(frappe._("Not collected"))}</span>'
+				)
+			specialty = frappe.utils.escape_html(record.specialty or "")
 		else:
-			course_report = '<span class="courses-attended-missing">Not provided</span>'
-
-		# Feedback collected mirrors submitted feedback on Course Attended
-		if record.feedback_collected:
-			feedback_cell = '<span class="courses-attended-ok">Collected</span>'
-		else:
-			feedback_cell = '<span class="courses-attended-missing">Not collected</span>'
+			row_class = ' class="courses-attended-row-legacy"'
+			url = get_url_to_form("Legacy Course Record", record.name)
+			source_cell = (
+				f'<a href="{frappe.utils.escape_html(url)}">'
+				f'{frappe.utils.escape_html(frappe._("Legacy history"))}</a>'
+			)
+			start_date = (
+				frappe.format_value(record.start_date, {"fieldtype": "Date"}) if record.start_date else ""
+			)
+			end_date = frappe.format_value(record.end_date, {"fieldtype": "Date"}) if record.end_date else ""
+			course_status = frappe.utils.escape_html(frappe._("Legacy (import)"))
+			course_report = "—"
+			feedback_cell = "—"
+			specialty = "—"
 
 		html += f"""
-			<tr>
+			<tr{row_class}>
+				<td>{source_cell}</td>
 				<td>{frappe.utils.escape_html(record.course_name or "")}</td>
 				<td>{start_date}</td>
 				<td>{end_date}</td>
@@ -361,15 +444,15 @@ def get_courses_attended_html(service_number):
 				<td>{course_status}</td>
 				<td>{course_report}</td>
 				<td>{feedback_cell}</td>
-				<td>{frappe.utils.escape_html(record.specialty or "")}</td>
+				<td>{specialty}</td>
 			</tr>
 		"""
-	
+
 	html += """
 		</tbody>
 	</table>
 	"""
-	
+
 	return html
 
 @frappe.whitelist()
@@ -754,34 +837,84 @@ def get_personnel_data(service_number):
 			"seniority_date": seniority_date
 		})
 	
-	# Get courses attended
+	# Courses: Course Attended + Legacy Course Record, merged by date (newest first)
 	course_records = frappe.db.get_all(
 		"Course Attended",
-		filters={
-			"service_number": service_number
-		},
+		filters={"service_number": service_number},
 		fields=[
+			"name",
 			"course_name",
 			"course_start_date",
 			"course_end_date",
 			"grade",
-			"course_report"
+			"course_report",
 		],
-		order_by="course_start_date desc, creation desc"
+		order_by="course_start_date desc, creation desc",
 	)
-	
-	# Format courses attended
+	legacy_course_records = frappe.db.get_all(
+		"Legacy Course Record",
+		filters={"personnel": service_number},
+		fields=["name", "course_name", "start_date", "end_date", "grade"],
+		order_by="end_date desc, start_date desc, creation desc",
+	)
+	merged_courses = []
 	for record in course_records:
-		start_date = frappe.format_value(record.course_start_date, {"fieldtype": "Date"}) if record.course_start_date else ""
-		end_date = frappe.format_value(record.course_end_date, {"fieldtype": "Date"}) if record.course_end_date else ""
-		
-		personnel_data["courses_attended"].append({
-			"course_name": record.course_name or "",
-			"course_start_date": start_date,
-			"course_end_date": end_date,
-			"grade": record.grade or "",
-			"course_report": record.course_report or ""
-		})
+		merged_courses.append(
+			(
+				_course_history_sort_date(record.course_end_date, record.course_start_date),
+				"attended",
+				record,
+			)
+		)
+	for record in legacy_course_records:
+		merged_courses.append(
+			(
+				_course_history_sort_date(record.end_date, record.start_date),
+				"legacy",
+				record,
+			)
+		)
+	merged_courses.sort(key=lambda x: x[0], reverse=True)
+
+	for _sk, kind, record in merged_courses:
+		if kind == "attended":
+			start_date = (
+				frappe.format_value(record.course_start_date, {"fieldtype": "Date"})
+				if record.course_start_date
+				else ""
+			)
+			end_date = (
+				frappe.format_value(record.course_end_date, {"fieldtype": "Date"})
+				if record.course_end_date
+				else ""
+			)
+			personnel_data["courses_attended"].append(
+				{
+					"name": record.name,
+					"course_name": record.course_name or "",
+					"course_start_date": start_date,
+					"course_end_date": end_date,
+					"grade": record.grade or "",
+					"course_report": record.course_report or "",
+					"record_doctype": "Course Attended",
+				}
+			)
+		else:
+			start_date = (
+				frappe.format_value(record.start_date, {"fieldtype": "Date"}) if record.start_date else ""
+			)
+			end_date = frappe.format_value(record.end_date, {"fieldtype": "Date"}) if record.end_date else ""
+			personnel_data["courses_attended"].append(
+				{
+					"name": record.name,
+					"course_name": record.course_name or "",
+					"course_start_date": start_date,
+					"course_end_date": end_date,
+					"grade": record.grade or "",
+					"course_report": "",
+					"record_doctype": "Legacy Course Record",
+				}
+			)
 	
 	return personnel_data
 
@@ -1037,15 +1170,49 @@ def get_personnel_brief_html(service_number):
 			</div>
 		"""
 	
-	# Courses Attended Summary
-	course_records = frappe.db.get_all(
+	# Courses Attended Summary (Course Attended + legacy imports), show 5 most recent
+	course_history_rows = []
+	_brief_cr = frappe.db.get_all(
 		"Course Attended",
 		filters={"service_number": service_number},
 		fields=["course_name", "course_start_date", "course_end_date", "grade"],
 		order_by="course_start_date desc",
-		limit=5
 	)
-	
+	for record in _brief_cr:
+		course_history_rows.append(
+			(
+				_course_history_sort_date(
+					record.get("course_end_date"), record.get("course_start_date")
+				),
+				{
+					"course_name": record.get("course_name"),
+					"course_start_date": record.get("course_start_date"),
+					"course_end_date": record.get("course_end_date"),
+					"grade": record.get("grade"),
+				},
+			)
+		)
+	_brief_lr = frappe.db.get_all(
+		"Legacy Course Record",
+		filters={"personnel": service_number},
+		fields=["course_name", "start_date", "end_date", "grade"],
+		order_by="end_date desc, start_date desc",
+	)
+	for record in _brief_lr:
+		course_history_rows.append(
+			(
+				_course_history_sort_date(record.get("end_date"), record.get("start_date")),
+				{
+					"course_name": record.get("course_name"),
+					"course_start_date": record.get("start_date"),
+					"course_end_date": record.get("end_date"),
+					"grade": record.get("grade"),
+				},
+			)
+		)
+	course_history_rows.sort(key=lambda x: x[0], reverse=True)
+	course_records = [x[1] for x in course_history_rows[:5]]
+
 	if course_records:
 		html += """
 			<div class="brief-section">
@@ -1061,20 +1228,22 @@ def get_personnel_brief_html(service_number):
 					</thead>
 					<tbody>
 		"""
-		
-		for record in course_records:
-			start_date = frappe.format_value(record.course_start_date, {"fieldtype": "Date"}) if record.course_start_date else "N/A"
-			end_date = frappe.format_value(record.course_end_date, {"fieldtype": "Date"}) if record.course_end_date else "N/A"
-			
+
+		for rec in course_records:
+			cs = rec.get("course_start_date")
+			ce = rec.get("course_end_date")
+			start_date = frappe.format_value(cs, {"fieldtype": "Date"}) if cs else "N/A"
+			end_date = frappe.format_value(ce, {"fieldtype": "Date"}) if ce else "N/A"
+
 			html += f"""
 						<tr>
-							<td>{frappe.utils.escape_html(record.course_name or "N/A")}</td>
+							<td>{frappe.utils.escape_html(rec.get("course_name") or "N/A")}</td>
 							<td>{start_date}</td>
 							<td>{end_date}</td>
-							<td>{frappe.utils.escape_html(record.grade or "N/A")}</td>
+							<td>{frappe.utils.escape_html(rec.get("grade") or "N/A")}</td>
 						</tr>
 			"""
-		
+
 		html += """
 					</tbody>
 				</table>
@@ -1093,7 +1262,7 @@ def get_personnel_brief_html(service_number):
 	# Summary Section
 	total_postings = len(posting_records) if posting_records else 0
 	total_promotions = len(promotion_records) if promotion_records else 0
-	total_courses = len(course_records) if course_records else 0
+	total_courses = len(course_history_rows) if course_history_rows else 0
 	
 	html += f"""
 		<div class="brief-summary">

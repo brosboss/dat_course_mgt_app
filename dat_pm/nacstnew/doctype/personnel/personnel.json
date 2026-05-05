@@ -453,10 +453,11 @@
    "fieldtype": "Section Break"
   }
  ],
+ "hide_toolbar": 1,
  "image_field": "personnel_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-03 17:43:16.329536",
+ "modified": "2026-05-05 22:37:18.122032",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Personnel",

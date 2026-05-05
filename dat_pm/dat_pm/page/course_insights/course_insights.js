@@ -322,17 +322,22 @@ frappe.pages["course-insights"].on_page_load = function (wrapper) {
 			"<div class=\"ci-stat\"><div class=\"ci-stat-value\">" +
 			esc(st.personnel_attended_count) +
 			"</div><div class=\"ci-stat-label\">" +
-			__("Persons attended (distinct)") +
+			__("Distinct personnel (attendance or legacy)") +
 			"</div></div>" +
 			"<div class=\"ci-stat\"><div class=\"ci-stat-value\">" +
 			esc(st.course_attended_records_count) +
 			"</div><div class=\"ci-stat-label\">" +
-			__("Submitted attendance records") +
+			__("Course Attended records (submitted)") +
+			"</div></div>" +
+			"<div class=\"ci-stat\"><div class=\"ci-stat-value\">" +
+			esc(st.legacy_course_records_count != null ? st.legacy_course_records_count : 0) +
+			"</div><div class=\"ci-stat-label\">" +
+			__("Legacy import records") +
 			"</div></div>" +
 			"<div class=\"ci-stat\"><div class=\"ci-stat-value\">" +
 			esc(st.personnel_due_count) +
 			"</div><div class=\"ci-stat-label\">" +
-			__("Persons due (not yet attended)") +
+			__("Persons due (not completed in system or legacy)") +
 			"</div></div>" +
 			"<div class=\"ci-stat\"><div class=\"ci-stat-value\">" +
 			esc(st.qualified_rank_count) +
@@ -374,7 +379,7 @@ frappe.pages["course-insights"].on_page_load = function (wrapper) {
 		if (breakdownRows) {
 			statusHtml =
 				"<h4 style=\"font-size: 13px; margin: 16px 0 8px 0; color: #334155;\">" +
-				__("Attendance records by status") +
+				__("Completion rows by status (includes legacy bucket)") +
 				"</h4>" +
 				"<div class=\"ci-table-wrap\"><table class=\"ci-table\"><thead><tr><th>" +
 				__("Status") +
@@ -553,7 +558,7 @@ frappe.pages["course-insights"].on_page_load = function (wrapper) {
 
 		if (!list.length && (msg.total || 0) === 0) {
 			empty.style.display = "block";
-			empty.textContent = __("No submitted attendance for this course.");
+			empty.textContent = __("No Course Attended or legacy import rows for this course.");
 			wrap.style.display = "none";
 			return;
 		}
@@ -562,8 +567,15 @@ frappe.pages["course-insights"].on_page_load = function (wrapper) {
 
 		var rows = list
 			.map(function (row, idx) {
+				var recDt = row.record_doctype || "Course Attended";
 				var docLink =
-					"<a class=\"ci-link\" href=\"#Form/Course Attended/" + esc(row.name) + "\">" + esc(row.personnel_name || row.service_number) + "</a>";
+					"<a class=\"ci-link\" href=\"#Form/" +
+					esc(recDt) +
+					"/" +
+					esc(row.name) +
+					"\">" +
+					esc(row.personnel_name || row.service_number) +
+					"</a>";
 				var rowNum = limit_start + idx + 1;
 				return (
 					"<tr>" +
@@ -624,7 +636,7 @@ frappe.pages["course-insights"].on_page_load = function (wrapper) {
 		if (!list.length && (msg.total || 0) === 0) {
 			empty.style.display = "block";
 			empty.textContent = __(
-				"No personnel are currently due (check qualified ranks on the course, or all eligible personnel may have already attended)."
+				"No personnel are currently due (check qualified ranks on the course, or all eligible personnel may already have completed the course in Course Attended or legacy import)."
 			);
 			wrap.style.display = "none";
 			return;
