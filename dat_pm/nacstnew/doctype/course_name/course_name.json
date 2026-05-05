@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_copy": 1,
+ "allow_import": 1,
  "autoname": "field:course_name",
  "creation": "2025-12-26 11:17:25.367890",
  "doctype": "DocType",
@@ -128,7 +129,7 @@
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2026-04-03 17:24:10.740524",
+ "modified": "2026-04-23 12:30:05.841676",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Course Name",
