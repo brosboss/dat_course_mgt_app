@@ -1,0 +1,125 @@
+<style>
+.import-course-name-guide {
+	font-size: 14px;
+	line-height: 1.55;
+	color: var(--text-color, #36414c);
+	max-width: 42rem;
+	margin: 0 auto;
+	padding: 0.25rem 0 0.5rem;
+}
+.import-course-name-guide .icng-section {
+	background: var(--control-bg, #fafbfc);
+	border: 1px solid var(--border-color, #d1d8dd);
+	border-radius: 10px;
+	padding: 1.1rem 1.25rem 1.25rem;
+	margin-bottom: 1.25rem;
+	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.import-course-name-guide .icng-section:last-child {
+	margin-bottom: 0;
+}
+.import-course-name-guide .icng-kicker {
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--text-muted, #74808b);
+	margin: 0 0 0.35rem;
+}
+.import-course-name-guide .icng-title {
+	font-size: 1.05rem;
+	font-weight: 600;
+	margin: 0 0 0.5rem;
+	color: var(--heading-color, #192734);
+	line-height: 1.35;
+}
+.import-course-name-guide .icng-lead {
+	margin: 0 0 1rem;
+	color: var(--text-muted, #5c6f7c);
+	font-size: 13px;
+	line-height: 1.5;
+}
+.import-course-name-guide .icng-steps {
+	counter-reset: icng-step;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.import-course-name-guide .icng-step {
+	display: flex;
+	gap: 0.85rem;
+	align-items: flex-start;
+	margin: 0 0 1rem;
+	padding: 0.65rem 0.75rem;
+	background: var(--modal-bg, #fff);
+	border-radius: 8px;
+	border: 1px solid var(--border-color, #e8eaec);
+}
+.import-course-name-guide .icng-step:last-child {
+	margin-bottom: 0;
+}
+.import-course-name-guide .icng-step::before {
+	counter-increment: icng-step;
+	content: counter(icng-step);
+	flex-shrink: 0;
+	width: 1.75rem;
+	height: 1.75rem;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	font-weight: 700;
+	color: #fff;
+	background: linear-gradient(145deg, #5e64ff 0%, #4c51d4 100%);
+	box-shadow: 0 1px 3px rgba(78, 84, 200, 0.35);
+	line-height: 1;
+	margin-top: 0.1rem;
+}
+.import-course-name-guide .icng-step-body {
+	flex: 1;
+	min-width: 0;
+}
+.import-course-name-guide .icng-step-body strong:first-child {
+	color: var(--heading-color, #192734);
+}
+.import-course-name-guide code {
+	font-size: 12px;
+	padding: 0.12em 0.35em;
+	border-radius: 4px;
+	background: var(--code-bg, #f0f4f7);
+	border: 1px solid var(--border-color, #e2e6ea);
+}
+</style>
+<div class="import-course-name-guide">
+	<div class="icng-section">
+		<p class="icng-kicker">Workflow A</p>
+		<h3 class="icng-title">New upload</h3>
+		<p class="icng-lead">Create new <strong>Course Name</strong> records in batches. Each course name must be unique in the system.</p>
+		<ol class="icng-steps">
+			<li class="icng-step">
+				<div class="icng-step-body"><strong>Download the template.</strong> Click <strong>Download CSV template</strong> for five sample rows (using real <strong>Rank</strong> and existing <strong>Course Name</strong> values for prerequisites when available). Use <strong>Download existing course names</strong> to avoid duplicates.</div>
+			</li>
+			<li class="icng-step">
+				<div class="icng-step-body"><strong>Columns.</strong> <strong>Required:</strong> <code>course_name</code> (new title, becomes the document name), and at least one of <code>rank_1</code> … <code>rank_5</code> with valid <strong>Rank</strong> names (each cell → one <strong>Qualified Rank</strong> row). <strong>Optional:</strong> <code>mandatory_prerequisite_course_1</code> … <code>mandatory_prerequisite_course_5</code> with existing <strong>Course Name</strong> values (each cell → one <strong>Mandatory Prerequisite Course</strong> row), same numbering pattern as ranks. Leave unused columns blank. Also optional: <code>course_abbreviation</code>, <code>parent_course_name</code>, <code>course_frequency</code> (<code>Yearly</code>, <code>Quaterly</code>, <code>One-off</code>). Legacy: <code>prerequisite_1</code> … <code>prerequisite_5</code> or pipe-separated <code>ranks</code> / <code>mandatory_prerequisites</code> still work.</div>
+			</li>
+			<li class="icng-step">
+				<div class="icng-step-body"><strong>Upload and submit.</strong> Choose <strong>— New CSV import —</strong>, <strong>Upload CSV</strong>, then fix any red rows (duplicate name in file or already in the database). Submit when all checks pass.</div>
+			</li>
+		</ol>
+	</div>
+
+	<div class="icng-section">
+		<p class="icng-kicker">Workflow B</p>
+		<h3 class="icng-title">Reload a batch</h3>
+		<p class="icng-lead">After import, pick a batch from <strong>Import batch</strong> to review links, remove single rows, roll over to edit in the form, or delete the whole batch.</p>
+		<ol class="icng-steps">
+			<li class="icng-step">
+				<div class="icng-step-body"><strong>Roll over.</strong> Unlocks every course in the batch so you can open <strong>Course Name</strong> and save changes. Before roll over, you can <strong>Remove</strong> individual locked rows from this page.</div>
+			</li>
+			<li class="icng-step">
+				<div class="icng-step-body"><strong>Delete entire batch</strong> removes all courses in that import. Other documents linking to them may prevent deletion—resolve links first if you see errors.</div>
+			</li>
+		</ol>
+	</div>
+</div>

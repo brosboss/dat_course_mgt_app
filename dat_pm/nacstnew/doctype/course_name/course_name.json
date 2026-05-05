@@ -22,7 +22,9 @@
   "course_frequency",
   "assignment_mode",
   "section_break_6xuqd",
-  "course_materials"
+  "course_materials",
+  "import_batch",
+  "import_locked"
  ],
  "fields": [
   {
@@ -123,6 +125,21 @@
    "fieldtype": "Table",
    "label": "Course Materials",
    "options": "Course Materials"
+  },
+  {
+   "fieldname": "import_batch",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Import Batch",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "import_locked",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Locked (import)",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
@@ -218,6 +235,18 @@
   {
    "read": 1,
    "role": "Can Create Course Nomination"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 0,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Import Course Name Manager",
+   "share": 0,
+   "write": 1
   }
  ],
  "quick_entry": 1,
