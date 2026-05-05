@@ -15,4 +15,5 @@ recursive-include dat_pm *.png
 recursive-include dat_pm *.py
 recursive-include dat_pm *.svg
 recursive-include dat_pm *.txt
+include dat_pm/dat_pm/page/import_course_histor/tutorial/import_course_history
 recursive-exclude dat_pm *.pyc

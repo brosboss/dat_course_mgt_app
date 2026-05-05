@@ -12,7 +12,9 @@
   "grade",
   "column_break_lpug",
   "start_date",
-  "end_date"
+  "end_date",
+  "import_batch",
+  "import_locked"
  ],
  "fields": [
   {
@@ -42,6 +44,7 @@
   {
    "fieldname": "personnel",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Personnel",
    "options": "Personnel",
    "reqd": 1
@@ -50,6 +53,7 @@
    "fetch_from": "personnel.personnel_name",
    "fieldname": "personnel_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Personnel Name",
    "read_only": 1,
    "reqd": 1
@@ -57,13 +61,26 @@
   {
    "fieldname": "column_break_lpug",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "import_batch",
+   "fieldtype": "Data",
+   "label": "Import Batch",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "import_locked",
+   "fieldtype": "Check",
+   "label": "Locked (import)",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-05 20:11:33.443793",
+ "modified": "2026-05-05 20:52:49.109477",
  "modified_by": "Administrator",
  "module": "Dat Pm",
  "name": "Legacy Course Record",
@@ -79,6 +96,18 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 0,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Import Course History Manager",
+   "share": 0,
    "write": 1
   }
  ],

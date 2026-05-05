@@ -1,0 +1,23 @@
+{
+ "content": null,
+ "creation": "2026-05-05 21:48:06.847098",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-05-05 21:48:06.847098",
+ "modified_by": "Administrator",
+ "module": "Dat Pm",
+ "name": "import-course-name",
+ "owner": "Administrator",
+ "page_name": "import-course-name",
+ "roles": [
+  {
+   "role": "Import Course Name Manager"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 1,
+ "title": "Import Course Name"
+}

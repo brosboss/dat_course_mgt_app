@@ -1,0 +1,137 @@
+<style>
+.import-course-history-guide {
+	font-size: 14px;
+	line-height: 1.55;
+	color: var(--text-color, #36414c);
+	max-width: 42rem;
+	margin: 0 auto;
+	padding: 0.25rem 0 0.5rem;
+}
+.import-course-history-guide .ichg-section {
+	background: var(--control-bg, #fafbfc);
+	border: 1px solid var(--border-color, #d1d8dd);
+	border-radius: 10px;
+	padding: 1.1rem 1.25rem 1.25rem;
+	margin-bottom: 1.25rem;
+	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.import-course-history-guide .ichg-section:last-child {
+	margin-bottom: 0;
+}
+.import-course-history-guide .ichg-kicker {
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--text-muted, #74808b);
+	margin: 0 0 0.35rem;
+}
+.import-course-history-guide .ichg-title {
+	font-size: 1.05rem;
+	font-weight: 600;
+	margin: 0 0 0.5rem;
+	color: var(--heading-color, #192734);
+	line-height: 1.35;
+}
+.import-course-history-guide .ichg-lead {
+	margin: 0 0 1rem;
+	color: var(--text-muted, #5c6f7c);
+	font-size: 13px;
+	line-height: 1.5;
+}
+.import-course-history-guide .ichg-steps {
+	counter-reset: ichg-step;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.import-course-history-guide .ichg-step {
+	display: flex;
+	gap: 0.85rem;
+	align-items: flex-start;
+	margin: 0 0 1rem;
+	padding: 0.65rem 0.75rem;
+	background: var(--modal-bg, #fff);
+	border-radius: 8px;
+	border: 1px solid var(--border-color, #e8eaec);
+}
+.import-course-history-guide .ichg-step:last-child {
+	margin-bottom: 0;
+}
+.import-course-history-guide .ichg-step::before {
+	counter-increment: ichg-step;
+	content: counter(ichg-step);
+	flex-shrink: 0;
+	width: 1.75rem;
+	height: 1.75rem;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	font-weight: 700;
+	color: #fff;
+	background: linear-gradient(145deg, #5e64ff 0%, #4c51d4 100%);
+	box-shadow: 0 1px 3px rgba(78, 84, 200, 0.35);
+	line-height: 1;
+	margin-top: 0.1rem;
+}
+.import-course-history-guide .ichg-step-body {
+	flex: 1;
+	min-width: 0;
+}
+.import-course-history-guide .ichg-step-body strong:first-child {
+	color: var(--heading-color, #192734);
+}
+.import-course-history-guide code {
+	font-size: 12px;
+	padding: 0.12em 0.35em;
+	border-radius: 4px;
+	background: var(--code-bg, #f0f4f7);
+	border: 1px solid var(--border-color, #e2e6ea);
+}
+</style>
+<div class="import-course-history-guide">
+	<div class="ichg-section">
+		<p class="ichg-kicker">Workflow A</p>
+		<h3 class="ichg-title">New upload</h3>
+		<p class="ichg-lead">Use this when you are bringing in legacy course history for the first time, or when you are adding a new import batch.</p>
+		<ol class="ichg-steps">
+			<li class="ichg-step">
+				<div class="ichg-step-body"><strong>Download the template.</strong> On this page, click <strong>Download CSV template</strong> and save the file. You must start from this template (or match its columns exactly) so the import can read your file. Optionally use <strong>Download courses (database)</strong> to export valid <code>course_name</code> values from the system.</div>
+			</li>
+			<li class="ichg-step">
+				<div class="ichg-step-body"><strong>Open the template in a spreadsheet.</strong> Open the file in Excel or another spreadsheet app. You will see <strong>sample rows</strong> that show the correct format: columns, service numbers, course names, and dates. Delete the sample rows once you understand the layout.</div>
+			</li>
+			<li class="ichg-step">
+				<div class="ichg-step-body"><strong>Enter your data.</strong> Replace or add rows with the people and courses to import. <strong>Required:</strong> <code>service_number</code> (or <code>personnel</code>) and <code>course_name</code>. <strong>Optional:</strong> <code>start_date</code>, <code>end_date</code>, <code>grade</code>, <code>personnel_name</code>. Every service number must exist on a <strong>Personnel</strong> record; every course name must match <strong>Course Name</strong> exactly. Save as CSV when finished.</div>
+			</li>
+			<li class="ichg-step">
+				<div class="ichg-step-body"><strong>Upload and submit.</strong> Set <strong>Import batch</strong> to <strong>— New CSV import —</strong>. Click <strong>Upload CSV</strong>, choose your file, and confirm. The table fills with your rows. Rows in <strong>red</strong> already exist in the database (same person and course); fix or remove them. When valid, click <strong>Submit import</strong> to save the batch.</div>
+			</li>
+		</ol>
+	</div>
+
+	<div class="ichg-section">
+		<p class="ichg-kicker">Workflow B</p>
+		<h3 class="ichg-title">Edit an uploaded batch</h3>
+		<p class="ichg-lead">Use this after a batch is saved, when you need to review, correct, or remove records.</p>
+		<ol class="ichg-steps">
+			<li class="ichg-step">
+				<div class="ichg-step-body"><strong>Open the batch.</strong> In <strong>Import batch</strong>, choose <strong>Batch 1</strong>, <strong>Batch 2</strong>, or the batch you need. The table reloads with every row in that import (same columns as after an upload).</div>
+			</li>
+			<li class="ichg-step">
+				<div class="ichg-step-body"><strong>Edit in the system.</strong> Click <strong>Roll over (unlock for editing)</strong>. Then open a row’s <strong>Record</strong> link (or open <strong>Legacy Course Record</strong> from the desk). Change dates, grade, or other allowed fields and save. Repeat for each record you need to fix.</div>
+			</li>
+			<li class="ichg-step">
+				<div class="ichg-step-body"><strong>Delete a single row (while still locked).</strong> If you have <strong>not</strong> rolled over yet, you can click <strong>Remove</strong> on one row to delete only that legacy record. After roll over, use the form or list view to delete if needed.</div>
+			</li>
+			<li class="ichg-step">
+				<div class="ichg-step-body"><strong>Delete the whole batch.</strong> Click <strong>Delete entire batch</strong> to remove every record in that import at once. You will be asked to confirm; this cannot be undone.</div>
+			</li>
+			<li class="ichg-step">
+				<div class="ichg-step-body"><strong>Reset the page.</strong> Click <strong>Clear</strong> to empty the table and reset <strong>Import batch</strong> so you can start a new upload or pick another batch.</div>
+			</li>
+		</ol>
+	</div>
+</div>
