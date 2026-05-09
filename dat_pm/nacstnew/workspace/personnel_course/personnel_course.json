@@ -1,36 +1,33 @@
 {
  "charts": [],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"Real Time Audit Log\"}}]",
- "creation": "2026-04-02 11:51:11.840365",
+ "content": "[{\"id\":\"dtOvHOzgMU\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Personnel Course</span>\",\"col\":12}}]",
+ "creation": "2026-04-02 11:50:55.929089",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "onboarding",
+ "icon": "hr",
  "idx": 0,
  "indicator_color": "green",
  "is_hidden": 0,
- "label": "Real Time Audit Log",
+ "label": "Personnel Course",
  "links": [],
- "modified": "2026-05-09 13:14:13.283139",
+ "modified": "2026-05-09 13:14:13.232867",
  "modified_by": "Administrator",
  "module": "Nacstnew",
- "name": "Real Time Audit Log",
+ "name": "Personnel Course",
  "number_cards": [],
- "owner": "brossboss@gmail.com",
+ "owner": "Administrator",
  "parent_page": "",
  "public": 1,
  "quick_lists": [],
  "roles": [
   {
    "role": "Can View Dashboard"
-  },
-  {
-   "role": "Can View Real-Time Audit Log"
   }
  ],
- "sequence_id": 7.0,
+ "sequence_id": 6.0,
  "shortcuts": [],
- "title": "Real Time Audit Log"
+ "title": "Personnel Course"
 }

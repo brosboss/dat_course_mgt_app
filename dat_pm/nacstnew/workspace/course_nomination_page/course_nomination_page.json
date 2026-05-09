@@ -1,22 +1,22 @@
 {
  "charts": [],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"Real Time Audit Log\"}}]",
- "creation": "2026-04-02 11:51:11.840365",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"Course Nomination Page\"}}]",
+ "creation": "2026-04-02 12:11:40.113350",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "onboarding",
+ "icon": "number-card",
  "idx": 0,
  "indicator_color": "green",
  "is_hidden": 0,
- "label": "Real Time Audit Log",
+ "label": "Course Nomination Page",
  "links": [],
- "modified": "2026-05-09 13:14:13.283139",
+ "modified": "2026-05-09 13:14:13.130881",
  "modified_by": "Administrator",
  "module": "Nacstnew",
- "name": "Real Time Audit Log",
+ "name": "Course Nomination Page",
  "number_cards": [],
  "owner": "brossboss@gmail.com",
  "parent_page": "",
@@ -25,12 +25,9 @@
  "roles": [
   {
    "role": "Can View Dashboard"
-  },
-  {
-   "role": "Can View Real-Time Audit Log"
   }
  ],
- "sequence_id": 7.0,
+ "sequence_id": 4.0,
  "shortcuts": [],
- "title": "Real Time Audit Log"
+ "title": "Course Nomination Page"
 }

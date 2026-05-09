@@ -12,7 +12,7 @@
  "is_hidden": 0,
  "label": "ADMIN Dashboard",
  "links": [],
- "modified": "2026-05-09 12:34:09.493693",
+ "modified": "2026-05-09 13:14:47.077918",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "ADMIN Dashboard",
@@ -45,7 +45,7 @@
    "role": "Can View Dashboard"
   }
  ],
- "sequence_id": 1.0,
+ "sequence_id": 2.0,
  "shortcuts": [
   {
    "color": "Grey",
