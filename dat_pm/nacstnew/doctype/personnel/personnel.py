@@ -1,9 +1,13 @@
 # Copyright (c) 2025, !! and contributors
 # For license information, please see license.txt
 
+import csv
+import io
+from typing import Any
+
 import frappe
-from frappe.model.document import Document
 from frappe import _
+from frappe.model.document import Document
 
 
 class Personnel(Document):
@@ -1932,6 +1936,18 @@ def export_personnel_list_to_excel(current_unit=None, rank=None, date_tos=None, 
 	# Use provide_binary_file to download directly
 	provide_binary_file(file_name, "xlsx", file_content)
 
+def _personnel_import_mandatory_fields() -> list[str]:
+	"""Explicit import fields required by the Personnel import page/template."""
+	return [
+		"service_number",
+		"category",
+		"type_of_commission",
+		"course",
+		"current_rank",
+		"personnel_name",
+	]
+
+
 @frappe.whitelist()
 def download_personnel_import_template(file_format='xlsx'):
 	"""Download a template file for personnel import"""
@@ -1939,13 +1955,9 @@ def download_personnel_import_template(file_format='xlsx'):
 	import csv
 	import io
 	
-	# Get mandatory fields dynamically from the doctype
+	# Use explicit mandatory import fields required by this workflow.
 	doctype_meta = frappe.get_meta("Personnel")
-	mandatory_fields = [field.fieldname for field in doctype_meta.fields if field.reqd]
-	
-	# Ensure data_import_reference is not in mandatory fields (it's optional)
-	if 'data_import_reference' in mandatory_fields:
-		mandatory_fields.remove('data_import_reference')
+	mandatory_fields = _personnel_import_mandatory_fields()
 	
 	# Add data_import_reference as optional field
 	template_fields = mandatory_fields + ['data_import_reference']
@@ -2016,7 +2028,7 @@ def download_personnel_import_template(file_format='xlsx'):
 		
 		# Add instructions row (row 4)
 		from openpyxl.utils import get_column_letter
-		instruction_text = "Instructions: 1) Fill in the mandatory fields (service_number, category, personnel_name). 2) data_import_reference is optional - used for rollback. 3) Delete this instruction row before importing. 4) Save the file and upload it using the import page."
+		instruction_text = "Instructions: 1) Fill in all mandatory fields (service_number, category, type_of_commission, course, current_rank, personnel_name). 2) data_import_reference is optional - used for rollback. 3) Delete this instruction row before importing. 4) Save the file and upload it using the import page."
 		ws.append([instruction_text] + [''] * (len(template_fields) - 1))
 		
 		# Merge cells for instructions (merge all columns)
@@ -2051,13 +2063,9 @@ def download_personnel_import_template(file_format='xlsx'):
 @frappe.whitelist()
 def validate_preview_data(rows_data):
 	"""Validate preview data and check for existing records"""
-	# Get mandatory fields dynamically from the doctype
+	# Use explicit mandatory import fields required by this workflow.
 	doctype_meta = frappe.get_meta("Personnel")
-	mandatory_fields = [field.fieldname for field in doctype_meta.fields if field.reqd]
-	
-	# Ensure data_import_reference is not in mandatory fields (it's optional)
-	if 'data_import_reference' in mandatory_fields:
-		mandatory_fields.remove('data_import_reference')
+	mandatory_fields = _personnel_import_mandatory_fields()
 	
 	# Normalize header names (remove spaces, underscores, convert to lowercase)
 	def normalize_header_name(header):
@@ -2337,13 +2345,9 @@ def import_personnel_data(file_name, file_content, file_extension, import_refere
 	if not import_reference:
 		import_reference = f"IMPORT_{now_datetime().strftime('%Y%m%d_%H%M%S')}"
 	
-	# Get mandatory fields dynamically from the doctype
+	# Use explicit mandatory import fields required by this workflow.
 	doctype_meta = frappe.get_meta("Personnel")
-	mandatory_fields = [field.fieldname for field in doctype_meta.fields if field.reqd]
-	
-	# Ensure data_import_reference is not in mandatory fields (it's optional)
-	if 'data_import_reference' in mandatory_fields:
-		mandatory_fields.remove('data_import_reference')
+	mandatory_fields = _personnel_import_mandatory_fields()
 	
 	results = {
 		'success': False,
@@ -2851,3 +2855,298 @@ def get_personnel_without_strength_returns(
 		"page_length": page_length,
 		"total_pages": total_pages,
 	}
+
+
+def _can_import_personnel():
+	if frappe.session.user == "Administrator":
+		return
+	roles = set(frappe.get_roles())
+	if {"System Manager", "Can Import Data", "Personnel Creator"} & roles:
+		return
+	frappe.throw(_("Not permitted to import personnel."), frappe.PermissionError)
+
+
+def _normalize_header(label: str) -> str:
+	return (label or "").strip().lower().replace(" ", "_")
+
+
+def _decode_file_content(content: str | bytes) -> str:
+	if isinstance(content, bytes):
+		text = content.decode("utf-8-sig")
+	else:
+		text = str(content)
+	if text.startswith("\ufeff"):
+		text = text[1:]
+	return text
+
+
+def _personnel_required_fields() -> list[str]:
+	return _personnel_import_mandatory_fields()
+
+
+def _personnel_template_fields() -> list[str]:
+	fields = list(_personnel_required_fields())
+	if "data_import_reference" not in fields:
+		fields.append("data_import_reference")
+	return fields
+
+
+def _row_get(row: dict, key: str) -> str:
+	v = row.get(key)
+	if v is None:
+		return ""
+	return str(v).strip()
+
+
+def _exists_exact_name(doctype: str, value: str) -> bool:
+	"""Case-sensitive existence check for name-based Link values."""
+	if not value:
+		return False
+	res = frappe.db.sql(
+		f"SELECT name FROM `tab{doctype}` WHERE BINARY name = %s LIMIT 1",
+		(value,),
+		as_dict=True,
+	)
+	return bool(res)
+
+
+@frappe.whitelist()
+def get_personnel_import_template_rows():
+	_can_import_personnel()
+	fields = _personnel_template_fields()
+	return {
+		"fields": fields,
+		"rows": [
+			{
+				"service_number": "SN-001",
+				"category": "OFFICER",
+				"type_of_commission": "",
+				"course": "",
+				"current_rank": "",
+				"personnel_name": "SAMPLE PERSONNEL NAME",
+			}
+		],
+	}
+
+
+@frappe.whitelist()
+def get_personnel_import_dropdown_options():
+	"""Dropdown options to help users correct missing/invalid link values during import preview."""
+	_can_import_personnel()
+	return {
+		"category": frappe.get_all("Personnel Category", pluck="name", order_by="name asc"),
+		"type_of_commission": frappe.get_all("Type of Commission", pluck="name", order_by="name asc"),
+		"course": frappe.get_all("Course", pluck="name", order_by="name asc"),
+		"current_rank": frappe.get_all("Rank", pluck="name", order_by="name asc"),
+	}
+
+
+@frappe.whitelist()
+def parse_personnel_import_file(file_name: str):
+	_can_import_personnel()
+	if not file_name:
+		frappe.throw(_("Attach a CSV file first."))
+	file_doc = frappe.get_doc("File", file_name)
+	content = file_doc.get_content()
+	if not content:
+		frappe.throw(_("Empty file."))
+	text = _decode_file_content(content)
+	reader = csv.DictReader(io.StringIO(text))
+	if not reader.fieldnames:
+		frappe.throw(_("The CSV has no header row."))
+	norm_fields = [_normalize_header(h) for h in reader.fieldnames if h]
+	if len(norm_fields) != len(set(norm_fields)):
+		frappe.throw(_("Duplicate column headers in CSV."))
+
+	rows_out: list[dict[str, Any]] = []
+	for i, raw_row in enumerate(reader):
+		if not any((str(v or "").strip()) for v in raw_row.values()):
+			continue
+		normalized = {
+			_normalize_header(k): (v.strip() if isinstance(v, str) else v) for k, v in raw_row.items() if k
+		}
+		row = {k: _row_get(normalized, k) for k in _personnel_template_fields()}
+		row["_row"] = i + 2
+		rows_out.append(row)
+	return {"rows": rows_out}
+
+
+def _validate_personnel_import_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+	required_fields = _personnel_required_fields()
+	service_counts: dict[str, int] = {}
+	for row in rows:
+		sn = (row.get("service_number") or "").strip()
+		if sn:
+			service_counts[sn] = service_counts.get(sn, 0) + 1
+
+	out: list[dict[str, Any]] = []
+	for row in rows:
+		row_no = row.get("_row") or "?"
+		sn = (row.get("service_number") or "").strip()
+		category = (row.get("category") or "").strip()
+		type_of_commission = (row.get("type_of_commission") or "").strip()
+		course = (row.get("course") or "").strip()
+		current_rank = (row.get("current_rank") or "").strip()
+		msgs: list[str] = []
+		for f in required_fields:
+			if not (row.get(f) or "").strip():
+				msgs.append(_("Row {0}, Column '{1}': value is required.").format(row_no, f))
+		file_duplicate = bool(sn and service_counts.get(sn, 0) > 1)
+		database_duplicate = bool(sn and frappe.db.exists("Personnel", sn))
+		if category and not _exists_exact_name("Personnel Category", category):
+			msgs.append(_("Row {0}, Column 'category': Personnel Category '{1}' does not exist.").format(row_no, category))
+		if type_of_commission and not _exists_exact_name("Type of Commission", type_of_commission):
+			msgs.append(
+				_("Row {0}, Column 'type_of_commission': Type of Commission '{1}' does not exist.").format(
+					row_no, type_of_commission
+				)
+			)
+		if course and not _exists_exact_name("Course", course):
+			msgs.append(_("Row {0}, Column 'course': Course '{1}' does not exist.").format(row_no, course))
+		if current_rank and not _exists_exact_name("Rank", current_rank):
+			msgs.append(_("Row {0}, Column 'current_rank': Rank '{1}' does not exist.").format(row_no, current_rank))
+		out.append(
+			{"database_duplicate": database_duplicate, "file_duplicate": file_duplicate, "messages": msgs}
+		)
+	return out
+
+
+@frappe.whitelist()
+def validate_personnel_import_rows(rows_json: str):
+	_can_import_personnel()
+	rows: list[dict[str, Any]] = frappe.parse_json(rows_json) or []
+	row_validation = _validate_personnel_import_rows(rows)
+	return {"row_validation": row_validation}
+
+
+@frappe.whitelist()
+def submit_personnel_import(rows_json: str, import_reference: str | None = None):
+	_can_import_personnel()
+	rows: list[dict[str, Any]] = frappe.parse_json(rows_json) or []
+	if not rows:
+		frappe.throw(_("No rows to import."))
+
+	row_validation = _validate_personnel_import_rows(rows)
+	structural = [m for rv in row_validation for m in rv.get("messages", [])]
+	if structural:
+		frappe.throw("\n".join(structural), title=_("Validation failed"))
+	if any(rv.get("file_duplicate") for rv in row_validation):
+		frappe.throw(_("Duplicate service number found in the uploaded file."))
+	if any(rv.get("database_duplicate") for rv in row_validation):
+		frappe.throw(_("One or more service numbers already exist in Personnel."))
+
+	if not import_reference:
+		import_reference = f"IMPORT_{frappe.generate_hash(length=10)}"
+
+	created: list[dict[str, str]] = []
+	fields = _personnel_template_fields()
+	insert_errors: list[str] = []
+	try:
+		for row in rows:
+			row_no = row.get("_row") or "?"
+			payload = {"doctype": "Personnel"}
+			for f in fields:
+				if f == "data_import_reference":
+					continue
+				payload[f] = (row.get(f) or "").strip() or None
+			payload["data_import_reference"] = import_reference
+			try:
+				doc = frappe.get_doc(payload)
+				doc.insert()
+				created.append(
+					{
+						"name": doc.name,
+						"service_number": doc.service_number or "",
+						"type_of_commission": doc.type_of_commission or "",
+						"course": doc.course or "",
+						"current_rank": doc.current_rank or "",
+						"personnel_name": doc.personnel_name or "",
+						"category": doc.category or "",
+					}
+				)
+			except frappe.LinkValidationError as e:
+				insert_errors.append(_("Row {0}, Column 'link': {1}").format(row_no, str(e)))
+			except frappe.MandatoryError as e:
+				insert_errors.append(_("Row {0}, Column 'mandatory': {1}").format(row_no, str(e)))
+			except frappe.UniqueValidationError as e:
+				insert_errors.append(_("Row {0}, Column 'service_number': {1}").format(row_no, str(e)))
+			except Exception as e:
+				insert_errors.append(_("Row {0}, Column 'unknown': {1}").format(row_no, str(e)))
+		if insert_errors:
+			frappe.db.rollback()
+			frappe.throw("\n".join(insert_errors), title=_("Import failed"))
+	except Exception:
+		frappe.db.rollback()
+		raise
+
+	return {"import_reference": import_reference, "created": created}
+
+
+@frappe.whitelist()
+def get_personnel_import_references():
+	_can_import_personnel()
+	rows = frappe.db.sql(
+		"""
+		SELECT data_import_reference AS import_reference, COUNT(*) AS cnt, MIN(creation) AS first_created
+		FROM `tabPersonnel`
+		WHERE IFNULL(data_import_reference, '') != ''
+		GROUP BY data_import_reference
+		ORDER BY first_created ASC
+		""",
+		as_dict=True,
+	)
+	for r in rows:
+		r.pop("first_created", None)
+	return {"references": rows}
+
+
+@frappe.whitelist()
+def get_personnel_import_records(import_reference: str):
+	_can_import_personnel()
+	if not import_reference:
+		frappe.throw(_("Import reference is required."))
+	docs = frappe.get_all(
+		"Personnel",
+		filters={"data_import_reference": import_reference},
+		fields=[
+			"name",
+			"service_number",
+			"type_of_commission",
+			"course",
+			"current_rank",
+			"personnel_name",
+			"category",
+		],
+		order_by="service_number asc",
+	)
+	if not docs:
+		frappe.throw(_("No personnel records found for this import reference."))
+	return {"import_reference": import_reference, "created": docs}
+
+
+@frappe.whitelist()
+def delete_personnel_import_row(service_number: str, import_reference: str):
+	_can_import_personnel()
+	if not service_number or not import_reference:
+		frappe.throw(_("Service Number and import reference are required."))
+	doc = frappe.get_doc("Personnel", service_number)
+	if (doc.data_import_reference or "") != import_reference:
+		frappe.throw(_("This record does not belong to the selected import reference."))
+	frappe.delete_doc("Personnel", service_number, ignore_permissions=False)
+
+
+@frappe.whitelist()
+def delete_personnel_import_reference(import_reference: str):
+	_can_import_personnel()
+	if not import_reference:
+		frappe.throw(_("Import reference is required."))
+	names = frappe.get_all(
+		"Personnel",
+		filters={"data_import_reference": import_reference},
+		pluck="name",
+	)
+	if not names:
+		frappe.throw(_("No personnel records found for this import reference."))
+	for name in names:
+		frappe.delete_doc("Personnel", name, ignore_permissions=False)
+	return {"deleted": len(names)}

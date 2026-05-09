@@ -1,0 +1,23 @@
+{
+ "content": null,
+ "creation": "2026-05-09 09:56:04.773523",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-05-09 12:43:11.066781",
+ "modified_by": "Administrator",
+ "module": "Dat Pm",
+ "name": "import-personnel",
+ "owner": "Administrator",
+ "page_name": "import-personnel",
+ "roles": [
+  {
+   "role": "Import Personnel Data"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 1,
+ "title": "Import Personnel"
+}

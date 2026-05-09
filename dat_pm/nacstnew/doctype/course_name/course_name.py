@@ -210,7 +210,54 @@ def _map_csv_row(raw: dict[str, Any]) -> dict[str, Any]:
 	prereq_list = _collect_prerequisites_from_normalized_row(raw)
 	if prereq_list:
 		mapped["prerequisites"] = prereq_list
+	# Expose rank_1…rank_5 and prerequisite slots for inline editing on the import page.
+	for i in range(1, 6):
+		s = ""
+		for key in (f"rank_{i}", f"qualified_rank_{i}", f"rank{i}"):
+			t = _cell_str(raw, key)
+			if t:
+				s = t
+				break
+		if not s and ranks_list and len(ranks_list) >= i:
+			s = ranks_list[i - 1]
+		mapped[f"rank_{i}"] = s
+	for i in range(1, 6):
+		s = ""
+		for key in (
+			f"mandatory_prerequisite_course_{i}",
+			f"mandatory_prerequisite_{i}",
+			f"prerequisite_{i}",
+			f"prereq_{i}",
+			f"prereq{i}",
+		):
+			t = _cell_str(raw, key)
+			if t:
+				s = t
+				break
+		if not s and prereq_list and len(prereq_list) >= i:
+			s = prereq_list[i - 1]
+		mapped[f"mandatory_prerequisite_course_{i}"] = s
 	return mapped
+
+
+def _sync_row_ranks_and_prereqs_from_slots(r: dict[str, Any]) -> None:
+	"""Rebuild ranks / prerequisites lists from rank_1…5 and mandatory_prerequisite_course_1…5."""
+	ranks: list[str] = []
+	seen_r: set[str] = set()
+	for i in range(1, 6):
+		s = (r.get(f"rank_{i}") or "").strip()
+		if s and s not in seen_r:
+			seen_r.add(s)
+			ranks.append(s)
+	r["ranks"] = ranks
+	prereqs: list[str] = []
+	seen_p: set[str] = set()
+	for i in range(1, 6):
+		s = (r.get(f"mandatory_prerequisite_course_{i}") or "").strip()
+		if s and s not in seen_p:
+			seen_p.add(s)
+			prereqs.append(s)
+	r["prerequisites"] = prereqs
 
 
 def _decode_file_content(content: str | bytes) -> str:
@@ -221,6 +268,29 @@ def _decode_file_content(content: str | bytes) -> str:
 	if text.startswith("\ufeff"):
 		text = text[1:]
 	return text
+
+
+def _exists_exact_name(doctype: str, value: str) -> bool:
+	"""Case-sensitive existence check for name-based Link values."""
+	if not value:
+		return False
+	res = frappe.db.sql(
+		f"SELECT name FROM `tab{doctype}` WHERE BINARY name = %s LIMIT 1",
+		(value,),
+		as_dict=True,
+	)
+	return bool(res)
+
+
+@frappe.whitelist()
+def get_import_course_name_dropdown_options():
+	"""Dropdown options for inline correction on Import Course Name page."""
+	_can_import_course_name()
+	return {
+		"rank": frappe.get_all("Rank", pluck="name", order_by="name asc"),
+		"course_name": frappe.get_all("Course Name", pluck="name", order_by="name asc"),
+		"course_frequency": ["Yearly", "Quaterly", "One-off"],
+	}
 
 
 def _normalize_frequency(val: str | None) -> str | None:
@@ -361,12 +431,14 @@ def _course_names_already_in_database(rows: list[dict[str, Any]]) -> set[str]:
 def _validate_rows_per_row(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 	name_counts: dict[str, int] = {}
 	for r in rows:
+		_sync_row_ranks_and_prereqs_from_slots(r)
 		cn = (r.get("course_name") or "").strip()
 		if cn:
 			name_counts[cn] = name_counts.get(cn, 0) + 1
 
 	out: list[dict[str, Any]] = []
 	for r in rows:
+		_sync_row_ranks_and_prereqs_from_slots(r)
 		row_no = r.get("_row") or "?"
 		cn = (r.get("course_name") or "").strip()
 		ranks = r.get("ranks") or []
@@ -378,37 +450,50 @@ def _validate_rows_per_row(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 		messages: list[str] = []
 		if not cn:
-			messages.append(_("Row {0}: course name is required.").format(row_no))
+			messages.append(_("Row {0}, Column 'course_name': course name is required.").format(row_no))
 
 		file_duplicate = bool(cn and name_counts.get(cn, 0) > 1)
 		database_duplicate = bool(cn and frappe.db.exists("Course Name", cn))
 
 		if not ranks:
 			messages.append(
-				_("Row {0}: at least one qualified rank is required (use rank_1 … rank_5 or a ranks column).").format(
-					row_no
-				)
+				_(
+					"Row {0}, Column 'rank_1': at least one qualified rank is required (rank_1 … rank_5 or ranks column)."
+				).format(row_no)
 			)
 		else:
-			for rank in ranks:
-				if not frappe.db.exists("Rank", rank):
+			for i in range(1, 6):
+				rank_val = (r.get(f"rank_{i}") or "").strip()
+				if not rank_val:
+					continue
+				if not _exists_exact_name("Rank", rank_val):
+					col = f"rank_{i}"
 					messages.append(
-						_("Row {0}: Rank '{1}' does not exist.").format(row_no, rank)
+						_("Row {0}, Column '{1}': Rank '{2}' does not exist.").format(row_no, col, rank_val)
 					)
 
 		pc = (r.get("parent_course_name") or "").strip()
-		if pc and not frappe.db.exists("Course Name", pc):
-			messages.append(_("Row {0}: Parent Course Name '{1}' does not exist.").format(row_no, pc))
+		if pc and not _exists_exact_name("Course Name", pc):
+			messages.append(
+				_("Row {0}, Column 'parent_course_name': Parent Course Name '{1}' does not exist.").format(row_no, pc)
+			)
 
-		for pr in prereqs:
+		for i in range(1, 6):
+			pr = (r.get(f"mandatory_prerequisite_course_{i}") or "").strip()
+			if not pr:
+				continue
 			if pr == cn:
+				pcol = f"mandatory_prerequisite_course_{i}"
 				messages.append(
-					_("Row {0}: Mandatory prerequisite cannot be the same as this row's course name.").format(row_no)
+					_(
+						"Row {0}, Column '{1}': prerequisite cannot be the same as this row's course name."
+					).format(row_no, pcol)
 				)
 				continue
-			if not frappe.db.exists("Course Name", pr):
+			if not _exists_exact_name("Course Name", pr):
+				pcol = f"mandatory_prerequisite_course_{i}"
 				messages.append(
-					_("Row {0}: Mandatory prerequisite '{1}' does not exist.").format(row_no, pr)
+					_("Row {0}, Column '{1}': prerequisite '{2}' does not exist.").format(row_no, pcol, pr)
 				)
 
 		cf = (r.get("course_frequency") or "").strip()
@@ -416,7 +501,9 @@ def _validate_rows_per_row(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 			nf = _normalize_frequency(cf)
 			if nf is None:
 				messages.append(
-					_("Row {0}: course_frequency must be Yearly, Quaterly, or One-off.").format(row_no)
+					_(
+						"Row {0}, Column 'course_frequency': must be Yearly, Quaterly, or One-off."
+					).format(row_no)
 				)
 
 		out.append(
@@ -478,6 +565,7 @@ def submit_import(rows_json: str):
 	batch_id = frappe.generate_hash(length=12)
 	created: list[dict[str, str]] = []
 	for r in rows:
+		_sync_row_ranks_and_prereqs_from_slots(r)
 		cn = (r.get("course_name") or "").strip()
 		ranks = r.get("ranks") or []
 		if isinstance(ranks, str):

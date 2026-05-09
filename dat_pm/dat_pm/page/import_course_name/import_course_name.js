@@ -19,6 +19,11 @@ frappe.pages["import-course-name"].on_page_load = function (wrapper) {
 		batch_number: null,
 		/** @type {boolean | undefined} */
 		import_lock_enabled: undefined,
+		dropdown_options: {
+			rank: [],
+			course_name: [],
+			course_frequency: [],
+		},
 	};
 
 	const method = (fn) => `dat_pm.nacstnew.doctype.course_name.course_name.${fn}`;
@@ -157,6 +162,70 @@ frappe.pages["import-course-name"].on_page_load = function (wrapper) {
 			return '"' + s.replace(/"/g, '""') + '"';
 		}
 		return s;
+	}
+
+	function load_dropdown_options() {
+		frappe.call({
+			method: method("get_import_course_name_dropdown_options"),
+			callback(r) {
+				if (r.exc) return;
+				const m = r.message || {};
+				state.dropdown_options.rank = m.rank || [];
+				state.dropdown_options.course_name = m.course_name || [];
+				state.dropdown_options.course_frequency = m.course_frequency || [];
+				render_table();
+			},
+		});
+	}
+
+	function get_select_html(fieldname, optionsKey, current_value, row_idx) {
+		const options = state.dropdown_options[optionsKey] || [];
+		const safeCurrent = current_value || "";
+		const hasCurrent = !!safeCurrent && options.includes(safeCurrent);
+		let html = `<select class="form-control input-xs icn-cell-select" data-field="${frappe.utils.escape_html(
+			fieldname
+		)}" data-idx="${row_idx}" style="min-width: 120px;">`;
+		html += `<option value="">${__("Select...")}</option>`;
+		if (safeCurrent && !hasCurrent) {
+			html += `<option value="${frappe.utils.escape_html(safeCurrent)}" selected>${frappe.utils.escape_html(
+				`${safeCurrent} (${__("not found")})`
+			)}</option>`;
+		}
+		options.forEach(function (opt) {
+			const selected = opt === safeCurrent ? "selected" : "";
+			html += `<option value="${frappe.utils.escape_html(opt)}" ${selected}>${frappe.utils.escape_html(opt)}</option>`;
+		});
+		html += `</select>`;
+		return html;
+	}
+
+	function get_text_input_html(fieldname, value, row_idx) {
+		const v = value != null ? String(value) : "";
+		return `<input type="text" class="form-control input-xs icn-cell-input" data-field="${frappe.utils.escape_html(
+			fieldname
+		)}" data-idx="${row_idx}" value="${frappe.utils.escape_html(v)}" style="min-width: 100px;" />`;
+	}
+
+	function extract_error_fields(rv) {
+		const fields = new Set();
+		if (!rv) return fields;
+		if (rv.database_duplicate || rv.file_duplicate) {
+			fields.add("course_name");
+		}
+		(rv.messages || []).forEach(function (m) {
+			const match = String(m).match(/Column\s+'([^']+)'/i);
+			if (match && match[1]) fields.add(match[1]);
+		});
+		return fields;
+	}
+
+	function error_cell_style(has_error) {
+		return has_error ? ' style="background-color:#f8d7da;"' : "";
+	}
+
+	function value_not_in_list(options, value) {
+		if (!value || !String(value).trim()) return false;
+		return !(options || []).includes(String(value).trim());
 	}
 
 	function show_import_guide() {
@@ -361,7 +430,13 @@ frappe.pages["import-course-name"].on_page_load = function (wrapper) {
 		const show_submitted = state.created.length > 0;
 		const cols = show_submitted
 			? ["_row", "course_name", "abbr", "parent", "frequency", "ranks", "prereqs", "doc", "actions"]
-			: ["_row", "course_name", "abbr", "parent", "frequency", "ranks", "prereqs", "actions"];
+			: (function () {
+					const c = ["_row", "course_name", "abbr", "parent", "frequency"];
+					for (let i = 1; i <= 5; i++) c.push(`rank_${i}`);
+					for (let i = 1; i <= 5; i++) c.push(`mandatory_prerequisite_course_${i}`);
+					c.push("actions");
+					return c;
+			  })();
 
 		let thead = "<tr>";
 		cols.forEach((c) => {
@@ -374,6 +449,9 @@ frappe.pages["import-course-name"].on_page_load = function (wrapper) {
 			else if (c === "frequency") thead += `<th>${__("Frequency")}</th>`;
 			else if (c === "ranks") thead += `<th>${__("Ranks")}</th>`;
 			else if (c === "prereqs") thead += `<th>${__("Prerequisites")}</th>`;
+			else if (c.startsWith("rank_")) thead += `<th>${__("Rank")} ${c.replace("rank_", "")}</th>`;
+			else if (c.startsWith("mandatory_prerequisite_course_"))
+				thead += `<th>${__("Prereq")} ${c.replace("mandatory_prerequisite_course_", "")}</th>`;
 			else thead += `<th>${frappe.utils.escape_html(c)}</th>`;
 		});
 		thead += "</tr>";
@@ -413,20 +491,55 @@ frappe.pages["import-course-name"].on_page_load = function (wrapper) {
 		} else {
 			state.rows.forEach((row, idx) => {
 				const rv = state.row_validation && state.row_validation[idx];
-				const trCls = rv && rv.database_duplicate ? "table-danger" : "";
+				const errFields = extract_error_fields(rv);
 				const remove_btn = `<button type="button" class="btn btn-xs btn-default btn-remove-row" data-idx="${idx}">${__(
 					"Remove"
 				)}</button>`;
-				tbody += `<tr${trCls ? ` class="${trCls}"` : ""}>
-					<td>${frappe.utils.escape_html(String(row._row || ""))}</td>
-					<td>${frappe.utils.escape_html(row.course_name || "")}</td>
-					<td>${frappe.utils.escape_html(row.course_abbreviation || "")}</td>
-					<td>${frappe.utils.escape_html(row.parent_course_name || "")}</td>
-					<td>${frappe.utils.escape_html(row.course_frequency || "")}</td>
-					<td>${frappe.utils.escape_html(ranks_cell(row))}</td>
-					<td>${frappe.utils.escape_html(prerequisites_cell(row))}</td>
-					<td>${remove_btn}</td>
-				</tr>`;
+				const cn = row.course_name || "";
+				const cnErrReal =
+					errFields.has("course_name") || !!(rv && (rv.file_duplicate || rv.database_duplicate) && cn);
+				const abbrErr = errFields.has("course_abbreviation");
+				const parentVal = row.parent_course_name || "";
+				const parentErr =
+					errFields.has("parent_course_name") ||
+					(!!parentVal && value_not_in_list(state.dropdown_options.course_name, parentVal));
+				const freqVal = row.course_frequency || "";
+				const freqErr = errFields.has("course_frequency");
+				let tds = `<td>${frappe.utils.escape_html(String(row._row || ""))}</td>`;
+				tds += `<td${error_cell_style(cnErrReal)}>${get_text_input_html("course_name", cn, idx)}</td>`;
+				tds += `<td${error_cell_style(abbrErr)}>${get_text_input_html(
+					"course_abbreviation",
+					row.course_abbreviation || "",
+					idx
+				)}</td>`;
+				tds += `<td${error_cell_style(parentErr)}>${get_select_html(
+					"parent_course_name",
+					"course_name",
+					parentVal,
+					idx
+				)}</td>`;
+				tds += `<td${error_cell_style(freqErr)}>${get_select_html(
+					"course_frequency",
+					"course_frequency",
+					freqVal,
+					idx
+				)}</td>`;
+				for (let i = 1; i <= 5; i++) {
+					const rk = `rank_${i}`;
+					const rvv = (row[rk] || "").trim();
+					const rErr =
+						errFields.has(rk) || (!!rvv && value_not_in_list(state.dropdown_options.rank, rvv));
+					tds += `<td${error_cell_style(rErr)}>${get_select_html(rk, "rank", rvv, idx)}</td>`;
+				}
+				for (let i = 1; i <= 5; i++) {
+					const pk = `mandatory_prerequisite_course_${i}`;
+					const pv = (row[pk] || "").trim();
+					const pErr =
+						errFields.has(pk) || (!!pv && value_not_in_list(state.dropdown_options.course_name, pv));
+					tds += `<td${error_cell_style(pErr)}>${get_select_html(pk, "course_name", pv, idx)}</td>`;
+				}
+				tds += `<td>${remove_btn}</td>`;
+				tbody += `<tr>${tds}</tr>`;
 			});
 		}
 
@@ -439,6 +552,22 @@ frappe.pages["import-course-name"].on_page_load = function (wrapper) {
 			state.rows.splice(idx, 1);
 			render_table();
 			refresh_actions();
+			run_validate_after_upload();
+		});
+
+		$table_host.find(".icn-cell-select").on("change", function () {
+			const idx = cint($(this).data("idx"));
+			const field = ($(this).data("field") || "").trim();
+			if (!state.rows[idx] || !field) return;
+			state.rows[idx][field] = ($(this).val() || "").trim();
+			run_validate_after_upload();
+		});
+
+		$table_host.find(".icn-cell-input").on("change blur", function () {
+			const idx = cint($(this).data("idx"));
+			const field = ($(this).data("field") || "").trim();
+			if (!state.rows[idx] || !field) return;
+			state.rows[idx][field] = ($(this).val() || "").trim();
 			run_validate_after_upload();
 		});
 
@@ -657,4 +786,5 @@ frappe.pages["import-course-name"].on_page_load = function (wrapper) {
 	render_table();
 	refresh_actions();
 	sync_batch_dropdown();
+	load_dropdown_options();
 };

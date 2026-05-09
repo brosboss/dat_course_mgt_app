@@ -19,6 +19,11 @@ frappe.pages["import-course-histor"].on_page_load = function (wrapper) {
 		batch_number: null,
 		/** @type {boolean | undefined} false when DB has no import_locked column */
 		import_lock_enabled: undefined,
+		dropdown_options: {
+			personnel: [],
+			course_name: [],
+			grade: [],
+		},
 	};
 
 	const method = (fn) => `dat_pm.dat_pm.doctype.legacy_course_record.legacy_course_record.${fn}`;
@@ -145,6 +150,72 @@ frappe.pages["import-course-histor"].on_page_load = function (wrapper) {
 			return '"' + s.replace(/"/g, '""') + '"';
 		}
 		return s;
+	}
+
+	function load_dropdown_options() {
+		frappe.call({
+			method: method("get_import_course_history_dropdown_options"),
+			callback(r) {
+				if (r.exc) return;
+				const m = r.message || {};
+				state.dropdown_options.personnel = m.personnel || [];
+				state.dropdown_options.course_name = m.course_name || [];
+				state.dropdown_options.grade = m.grade || [];
+				render_table();
+			},
+		});
+	}
+
+	function get_select_html(fieldname, current_value, row_idx) {
+		const options = state.dropdown_options[fieldname] || [];
+		const safeCurrent = current_value || "";
+		const hasCurrent = !!safeCurrent && options.includes(safeCurrent);
+		let html = `<select class="form-control input-xs ich-cell-select" data-field="${frappe.utils.escape_html(
+			fieldname
+		)}" data-idx="${row_idx}" style="min-width: 140px;">`;
+		html += `<option value="">${__("Select...")}</option>`;
+		if (safeCurrent && !hasCurrent) {
+			html += `<option value="${frappe.utils.escape_html(safeCurrent)}" selected>${frappe.utils.escape_html(
+				`${safeCurrent} (${__("not found")})`
+			)}</option>`;
+		}
+		options.forEach(function (opt) {
+			const selected = opt === safeCurrent ? "selected" : "";
+			html += `<option value="${frappe.utils.escape_html(opt)}" ${selected}>${frappe.utils.escape_html(opt)}</option>`;
+		});
+		html += `</select>`;
+		return html;
+	}
+
+	function get_date_input_html(fieldname, value, row_idx) {
+		const v = value != null ? String(value) : "";
+		return `<input type="text" class="form-control input-xs ich-cell-date" data-field="${frappe.utils.escape_html(
+			fieldname
+		)}" data-idx="${row_idx}" value="${frappe.utils.escape_html(v)}" placeholder="YYYY-MM-DD" style="min-width:110px;" />`;
+	}
+
+	function extract_error_fields(rv) {
+		const fields = new Set();
+		if (!rv) return fields;
+		if (rv.database_duplicate || rv.file_duplicate) {
+			fields.add("personnel");
+			fields.add("course_name");
+		}
+		(rv.messages || []).forEach(function (m) {
+			const match = String(m).match(/Column\s+'([^']+)'/i);
+			if (match && match[1]) fields.add(match[1]);
+		});
+		return fields;
+	}
+
+	function error_cell_style(has_error) {
+		return has_error ? ' style="background-color:#f8d7da;"' : "";
+	}
+
+	function value_not_in_options(fieldname, value) {
+		if (!value) return false;
+		const opts = state.dropdown_options[fieldname] || [];
+		return !opts.includes(value);
 	}
 
 	function show_import_guide() {
@@ -369,17 +440,22 @@ frappe.pages["import-course-histor"].on_page_load = function (wrapper) {
 		} else {
 			state.rows.forEach((row, idx) => {
 				const rv = state.row_validation && state.row_validation[idx];
-				const trCls = rv && rv.database_duplicate ? "table-danger" : "";
+				const errFields = extract_error_fields(rv);
 				const remove_btn = `<button type="button" class="btn btn-xs btn-default btn-remove-row" data-idx="${idx}">${__(
 					"Remove"
 				)}</button>`;
-				tbody += `<tr${trCls ? ` class="${trCls}"` : ""}>
+				const personnelErr = errFields.has("personnel") || value_not_in_options("personnel", row.personnel || "");
+				const courseErr = errFields.has("course_name") || value_not_in_options("course_name", row.course_name || "");
+				const gradeErr = errFields.has("grade") || value_not_in_options("grade", (row.grade || "").trim());
+				const startErr = errFields.has("start_date");
+				const endErr = errFields.has("end_date");
+				tbody += `<tr>
 					<td>${frappe.utils.escape_html(String(row._row || ""))}</td>
-					<td>${frappe.utils.escape_html(row.personnel || "")}</td>
-					<td>${frappe.utils.escape_html(row.course_name || "")}</td>
-					<td>${frappe.utils.escape_html(row.start_date || "")}</td>
-					<td>${frappe.utils.escape_html(row.end_date || "")}</td>
-					<td>${frappe.utils.escape_html(row.grade || "")}</td>
+					<td${error_cell_style(personnelErr)}>${get_select_html("personnel", row.personnel || "", idx)}</td>
+					<td${error_cell_style(courseErr)}>${get_select_html("course_name", row.course_name || "", idx)}</td>
+					<td${error_cell_style(startErr)}>${get_date_input_html("start_date", row.start_date || "", idx)}</td>
+					<td${error_cell_style(endErr)}>${get_date_input_html("end_date", row.end_date || "", idx)}</td>
+					<td${error_cell_style(gradeErr)}>${get_select_html("grade", row.grade || "", idx)}</td>
 					<td>${remove_btn}</td>
 				</tr>`;
 			});
@@ -394,6 +470,22 @@ frappe.pages["import-course-histor"].on_page_load = function (wrapper) {
 			state.rows.splice(idx, 1);
 			render_table();
 			refresh_actions();
+			run_validate_after_upload();
+		});
+
+		$table_host.find(".ich-cell-select").on("change", function () {
+			const idx = cint($(this).data("idx"));
+			const field = ($(this).data("field") || "").trim();
+			if (!state.rows[idx] || !field) return;
+			state.rows[idx][field] = ($(this).val() || "").trim();
+			run_validate_after_upload();
+		});
+
+		$table_host.find(".ich-cell-date").on("change blur", function () {
+			const idx = cint($(this).data("idx"));
+			const field = ($(this).data("field") || "").trim();
+			if (!state.rows[idx] || !field) return;
+			state.rows[idx][field] = ($(this).val() || "").trim();
 			run_validate_after_upload();
 		});
 
@@ -612,4 +704,5 @@ frappe.pages["import-course-histor"].on_page_load = function (wrapper) {
 	render_table();
 	refresh_actions();
 	sync_batch_dropdown();
+	load_dropdown_options();
 };

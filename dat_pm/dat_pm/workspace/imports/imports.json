@@ -1,0 +1,51 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"dHFtlnEYfk\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">IMPORTS</span>\",\"col\":12}},{\"id\":\"AS71SAXELR\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Import Personnel\",\"col\":3}},{\"id\":\"7rTfRDLzr7\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Import Course Name\",\"col\":3}},{\"id\":\"cmjiWVXI0q\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Import Course History\",\"col\":3}}]",
+ "creation": "2026-05-09 12:45:12.800302",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "sort",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "IMPORTS",
+ "links": [],
+ "modified": "2026-05-09 12:55:50.715858",
+ "modified_by": "Administrator",
+ "module": "Dat Pm",
+ "name": "IMPORTS",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 33.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Import Personnel",
+   "link_to": "import-personnel",
+   "type": "Page"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Import Course Name",
+   "link_to": "import-course-name",
+   "type": "Page"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Import Course History",
+   "link_to": "import-course-histor",
+   "type": "Page"
+  }
+ ],
+ "title": "IMPORTS"
+}

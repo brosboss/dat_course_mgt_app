@@ -144,6 +144,29 @@ def _decode_file_content(content: str | bytes) -> str:
 	return text
 
 
+def _exists_exact_name(doctype: str, value: str) -> bool:
+	"""Case-sensitive existence check for name-based Link values."""
+	if not value:
+		return False
+	res = frappe.db.sql(
+		f"SELECT name FROM `tab{doctype}` WHERE BINARY name = %s LIMIT 1",
+		(value,),
+		as_dict=True,
+	)
+	return bool(res)
+
+
+@frappe.whitelist()
+def get_import_course_history_dropdown_options():
+	"""Dropdown options for inline correction on Import Course History page."""
+	_can_import_course_history()
+	return {
+		"personnel": frappe.get_all("Personnel", pluck="name", order_by="name asc"),
+		"course_name": frappe.get_all("Course Name", pluck="name", order_by="name asc"),
+		"grade": frappe.get_all("Grade", pluck="name", order_by="name asc"),
+	}
+
+
 def _existing_legacy_personnel_course_pairs() -> set[tuple[str, str]]:
 	rows = frappe.db.sql(
 		"""
@@ -292,23 +315,32 @@ def _validate_rows_per_row(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 		messages: list[str] = []
 
 		if not p:
-			messages.append(_("Row {0}: service number / personnel is required.").format(row_no))
+			messages.append(_("Row {0}, Column 'personnel': service number / personnel is required.").format(row_no))
 		if not c:
-			messages.append(_("Row {0}: course name is required.").format(row_no))
+			messages.append(_("Row {0}, Column 'course_name': course name is required.").format(row_no))
 
 		file_duplicate = bool(p and c and pair_counts.get((p, c), 0) > 1)
 		database_duplicate = bool(
 			p and c and frappe.db.exists("Legacy Course Record", {"personnel": p, "course_name": c})
 		)
 
+		for date_field in ("start_date", "end_date"):
+			raw_d = (r.get(date_field) or "").strip()
+			if not raw_d:
+				continue
+			try:
+				getdate(raw_d)
+			except Exception:
+				messages.append(_("Row {0}, Column '{1}': invalid date.").format(row_no, date_field))
+
 		if p and c:
-			if not frappe.db.exists("Personnel", p):
-				messages.append(_("Row {0}: Personnel '{1}' does not exist.").format(row_no, p))
-			if not frappe.db.exists("Course Name", c):
-				messages.append(_("Row {0}: Course Name '{1}' does not exist.").format(row_no, c))
+			if not _exists_exact_name("Personnel", p):
+				messages.append(_("Row {0}, Column 'personnel': Personnel '{1}' does not exist.").format(row_no, p))
+			if not _exists_exact_name("Course Name", c):
+				messages.append(_("Row {0}, Column 'course_name': Course Name '{1}' does not exist.").format(row_no, c))
 			g = (r.get("grade") or "").strip()
-			if g and not frappe.db.exists("Grade", g):
-				messages.append(_("Row {0}: Grade '{1}' does not exist.").format(row_no, g))
+			if g and not _exists_exact_name("Grade", g):
+				messages.append(_("Row {0}, Column 'grade': Grade '{1}' does not exist.").format(row_no, g))
 
 		out.append(
 			{
