@@ -1,8 +1,0 @@
-{
- "db_name": "daptm",
- "db_password": "EcNMra6zbRTs3LBZ",
- "db_type": "mariadb",
- "developer_mode": 1,
- "ssl_certificate": "/etc/letsencrypt/live/datpm.cynktrontech.com/fullchain.pem",
- "ssl_certificate_key": "/etc/letsencrypt/live/datpm.cynktrontech.com/privkey.pem"
-}
