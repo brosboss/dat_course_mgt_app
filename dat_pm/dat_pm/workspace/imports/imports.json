@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"dHFtlnEYfk\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">IMPORTS</span>\",\"col\":12}},{\"id\":\"AS71SAXELR\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Import Personnel\",\"col\":3}},{\"id\":\"7rTfRDLzr7\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Import Course Name\",\"col\":3}},{\"id\":\"cmjiWVXI0q\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Import Course History\",\"col\":3}}]",
+ "content": "[{\"id\":\"dHFtlnEYfk\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">IMPORTS</span>\",\"col\":12}},{\"id\":\"AS71SAXELR\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Import Personnel\",\"col\":3}},{\"id\":\"7rTfRDLzr7\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Import Course\",\"col\":3}},{\"id\":\"cmjiWVXI0q\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Import Course History\",\"col\":3}}]",
  "creation": "2026-05-09 12:45:12.800302",
  "custom_blocks": [],
  "docstatus": 0,
@@ -13,7 +13,7 @@
  "is_hidden": 0,
  "label": "IMPORTS",
  "links": [],
- "modified": "2026-05-09 13:14:12.922174",
+ "modified": "2026-05-13 14:13:59.307297",
  "modified_by": "Administrator",
  "module": "Dat Pm",
  "name": "IMPORTS",
@@ -35,7 +35,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
-   "label": "Import Course Name",
+   "label": "Import Course",
    "link_to": "import-course-name",
    "type": "Page"
   },
