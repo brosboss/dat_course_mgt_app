@@ -164,16 +164,20 @@ frappe.pages["import-course-name"].on_page_load = function (wrapper) {
 		return s;
 	}
 
-	function load_dropdown_options() {
+	function load_dropdown_options(on_done) {
 		frappe.call({
 			method: method("get_import_course_name_dropdown_options"),
 			callback(r) {
-				if (r.exc) return;
+				if (r.exc) {
+					if (typeof on_done === "function") on_done();
+					return;
+				}
 				const m = r.message || {};
 				state.dropdown_options.rank = m.rank || [];
 				state.dropdown_options.course_name = m.course_name || [];
 				state.dropdown_options.course_frequency = m.course_frequency || [];
 				render_table();
+				if (typeof on_done === "function") on_done();
 			},
 		});
 	}
@@ -369,13 +373,6 @@ frappe.pages["import-course-name"].on_page_load = function (wrapper) {
 				structMsgs.push(m);
 			});
 		});
-		if (dbN) {
-			is_error = true;
-			html +=
-				`<p><strong>${__("{0} row(s) already exist as Course Name", [String(dbN)])}</strong> — ${__(
-					"highlighted in red. Use a new course name or remove the row before submitting."
-				)}</p>`;
-		}
 		if (fileN) {
 			is_error = true;
 			html +=
@@ -394,8 +391,35 @@ frappe.pages["import-course-name"].on_page_load = function (wrapper) {
 					.join("") +
 				`</ul>`;
 		}
-		if (!html) {
-			html = `<p>${__("All rows passed checks. You can submit the import.")}</p>`;
+		if (payload.ok) {
+			html += `<p>${__("All rows passed checks. You can submit the import.")}</p>`;
+		} else if (payload.ok_for_update) {
+			html += `<p>${__(
+				"All rows match existing Course Names. Click <strong>Update from CSV</strong> to save these values to the database, or change names to submit a new import."
+			)}</p>`;
+			const cyc = (payload.prerequisite_cycle || "").trim();
+			if (cyc) {
+				html += `<p class="text-warning">${frappe.utils.escape_html(cyc)} ${__(
+					"(Submit import would be blocked until this is fixed; updating existing rows is still allowed.)"
+				)}</p>`;
+			}
+		} else {
+			if (dbN) {
+				is_error = true;
+				html +=
+					`<p><strong>${__("{0} row(s) already exist as Course Name", [String(dbN)])}</strong> — ${__(
+						"highlighted in red. Use a new course name, remove the row, or use Update from CSV if you intend to correct those records."
+					)}</p>`;
+			}
+			const cyc = (payload.prerequisite_cycle || "").trim();
+			if (cyc && !payload.ok_for_update) {
+				is_error = true;
+				html += `<p>${frappe.utils.escape_html(cyc)}</p>`;
+			}
+			if (!html) {
+				html = `<p class="text-muted">${__("Fix the issues above to submit or update.")}</p>`;
+				is_error = true;
+			}
 		}
 		set_status(html, is_error);
 	}
@@ -417,6 +441,20 @@ frappe.pages["import-course-name"].on_page_load = function (wrapper) {
 				render_table();
 				refresh_actions();
 			},
+		});
+	}
+
+	function rows_validation_ready_for_update() {
+		if (!state.rows.length) return false;
+		if (!Array.isArray(state.row_validation) || state.row_validation.length !== state.rows.length) return false;
+		return state.row_validation.every(function (rv, idx) {
+			const cn = (state.rows[idx].course_name || "").trim();
+			if (!cn) return false;
+			return (
+				rv.database_duplicate === true &&
+				!rv.file_duplicate &&
+				(!rv.messages || !rv.messages.length)
+			);
 		});
 	}
 
@@ -489,6 +527,7 @@ frappe.pages["import-course-name"].on_page_load = function (wrapper) {
 				</tr>`;
 			});
 		} else {
+			const updateReady = rows_validation_ready_for_update();
 			state.rows.forEach((row, idx) => {
 				const rv = state.row_validation && state.row_validation[idx];
 				const errFields = extract_error_fields(rv);
@@ -497,7 +536,9 @@ frappe.pages["import-course-name"].on_page_load = function (wrapper) {
 				)}</button>`;
 				const cn = row.course_name || "";
 				const cnErrReal =
-					errFields.has("course_name") || !!(rv && (rv.file_duplicate || rv.database_duplicate) && cn);
+					errFields.has("course_name") ||
+					!!(rv && rv.file_duplicate && cn) ||
+					!!(rv && rv.database_duplicate && cn && !updateReady);
 				const abbrErr = errFields.has("course_abbreviation");
 				const parentVal = row.parent_course_name || "";
 				const parentErr =
@@ -645,6 +686,19 @@ frappe.pages["import-course-name"].on_page_load = function (wrapper) {
 			});
 		});
 
+		const preview_mode = state.rows.length > 0 && state.created.length === 0;
+		const create_prereq_btn = $(
+			`<button class="btn btn-default btn-sm" ${!preview_mode ? "disabled" : ""}>${__(
+				"Create missing prerequisite courses"
+			)}</button>`
+		).on("click", () => run_create_missing_prerequisites());
+
+		const update_btn = $(
+			`<button class="btn btn-default btn-sm" ${
+				!preview_mode || !rows_validation_ready_for_update() ? "disabled" : ""
+			}>${__("Update from CSV")}</button>`
+		).on("click", () => run_update_from_csv());
+
 		const submit_btn = $(
 			`<button class="btn btn-primary btn-sm" ${!rows_validation_ready() ? "disabled" : ""}>${__(
 				"Submit import"
@@ -681,7 +735,103 @@ frappe.pages["import-course-name"].on_page_load = function (wrapper) {
 			sync_batch_dropdown();
 		});
 
-		$actions.append(template_btn, list_btn, upload_btn, submit_btn, rollover_btn, delete_batch_btn, reset_btn);
+		$actions.append(
+			template_btn,
+			list_btn,
+			upload_btn,
+			create_prereq_btn,
+			update_btn,
+			submit_btn,
+			rollover_btn,
+			delete_batch_btn,
+			reset_btn
+		);
+	}
+
+	function run_update_from_csv() {
+		if (!state.rows.length || state.created.length) return;
+		if (!rows_validation_ready_for_update()) return;
+		frappe.confirm(
+			__(
+				"This overwrites each listed Course Name in the database with the abbreviation, parent, frequency, qualified ranks, and mandatory prerequisites from the table. Continue?"
+			),
+			() => {
+				frappe.call({
+					method: method("update_import_rows"),
+					args: { rows_json: JSON.stringify(state.rows) },
+					freeze: true,
+					freeze_message: __("Updating…"),
+					callback(r) {
+						if (r.exc) return;
+						const n = (r.message && r.message.count) || 0;
+						frappe.show_alert({
+							message: __("Updated {0} course name(s)", [String(n)]),
+							indicator: "green",
+						});
+						load_dropdown_options(() => run_validate_after_upload());
+					},
+				});
+			}
+		);
+	}
+
+	function run_create_missing_prerequisites() {
+		if (!state.rows.length || state.created.length) return;
+		frappe.confirm(
+			__(
+				"This will add new Course Name records for any prerequisite in columns 1–5 that is not already in the catalogue and is not the course name of another row in this file. Each new course gets the valid qualified ranks from the first row that references it. Continue?"
+			),
+			() => {
+				frappe.call({
+					method: method("create_missing_prerequisite_courses_from_preview"),
+					args: { rows_json: JSON.stringify(state.rows) },
+					freeze: true,
+					freeze_message: __("Creating courses…"),
+					callback(r) {
+						if (r.exc) return;
+						const m = r.message || {};
+						const created = m.created || [];
+						const skipped = m.skipped_no_valid_ranks || [];
+						if (m.nothing_to_do) {
+							frappe.show_alert({
+								message: __("No missing prerequisites to create (all exist or are defined on another row)."),
+								indicator: "blue",
+							});
+							return;
+						}
+						let parts = [];
+						if (created.length) {
+							parts.push(
+								`<p>${__("Created {0} course name(s):", [String(created.length)])} ${frappe.utils.escape_html(
+									created.map((x) => x.course_name || x.name).join(", ")
+								)}</p>`
+							);
+						}
+						if (skipped.length) {
+							parts.push(
+								`<p class="text-warning">${__(
+									"Skipped (no valid Rank on the referencing row for auto-create):"
+								)} ${frappe.utils.escape_html(skipped.join(", "))}</p>`
+							);
+						}
+						if (parts.length) {
+							frappe.msgprint({ title: __("Prerequisite courses"), message: parts.join("") });
+						} else if (!m.nothing_to_do) {
+							frappe.show_alert({ message: __("No new courses were created."), indicator: "orange" });
+						}
+						load_dropdown_options(() => {
+							run_validate_after_upload();
+						});
+						if (created.length) {
+							frappe.show_alert({
+								message: __("Created {0} prerequisite course(s)", [String(created.length)]),
+								indicator: "green",
+							});
+						}
+					},
+				});
+			}
+		);
 	}
 
 	function run_submit() {
